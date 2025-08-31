@@ -414,7 +414,23 @@ def get_db_connection():
         return None
 
 # Enhanced Cesium component with proper configuration
-def create_enhanced_cesium_map(float_data):
+def create_enhanced_cesium_map():
+    """Create Cesium map with all ARGO float locations from database"""
+    # Get all float locations
+    float_locations = get_all_float_locations()
+    
+    # Prepare data for Cesium
+    float_data_for_cesium = []
+    
+    for _, row in float_locations.iterrows():
+        float_data_for_cesium.append({
+            'id': row['platform_number'],
+            'lat': row['latitude'],
+            'lon': row['longitude'],
+            'temp': round(row['temperature'], 1) if pd.notna(row['temperature']) else 'N/A',
+            'salinity': round(row['salinity'], 1) if pd.notna(row['salinity']) else 'N/A'
+        })
+    
     cesium_html = f"""
     <!DOCTYPE html>
     <html>
@@ -427,164 +443,147 @@ def create_enhanced_cesium_map(float_data):
                 font-family: 'Inter', sans-serif;
                 background: #1a1a1a;
             }}
-            
             .cesium-widget-credits {{ display: none !important; }}
-            
-            .metrics-overlay {{
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                background: rgba(45, 45, 45, 0.95);
-                padding: 15px;
-                border-radius: 10px;
-                border: 1px solid #404040;
-                color: white;
-                font-size: 12px;
-                min-width: 200px;
-            }}
-            
-            .metric {{
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 8px;
-            }}
-            
-            .metric-label {{ color: #888; }}
-            .metric-value {{ color: #ff8c42; font-weight: 600; }}
-            
-            .sample-queries {{
-                position: absolute;
-                bottom: 20px;
-                left: 20px;
-                background: rgba(45, 45, 45, 0.95);
-                padding: 15px;
-                border-radius: 10px;
-                border: 1px solid #404040;
-                max-width: 300px;
-                color: white;
-            }}
-            
-            .sample-query {{
-                background: #3a3a3a;
-                padding: 8px 12px;
-                margin: 5px 0;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 12px;
-                transition: all 0.2s;
-            }}
-            
-            .sample-query:hover {{
-                background: #4a4a4a;
-                color: #ff8c42;
+            .cesium-infoBox-description {{
+                font-family: 'Inter', sans-serif;
             }}
         </style>
     </head>
     <body>
         <div id="cesiumContainer"></div>
         
-        
-        
-        
-        
         <script>
             // Set your Cesium Ion token
             Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3YTEzNTA0Yy0zYTQ5LTRiNDktYjNlOC03Y2ZkMTVkZDYyZjgiLCJpZCI6MzM2ODU4LCJpYXQiOjE3NTY2MTYxMjZ9.0vZQSC8KBvZBEHEleN_4V7T4CMYcyRQz4M5dZm4bARo';
             
-            // Initialize the Cesium Viewer
+            // Initialize with simpler configuration
             const viewer = new Cesium.Viewer('cesiumContainer', {{
                 terrainProvider: Cesium.createWorldTerrain(),
-                baseLayerPicker: true,
-                geocoder: true,
-                homeButton: true,
-                sceneModePicker: true,
+                baseLayerPicker: false,
+                geocoder: false,
+                homeButton: false,
+                sceneModePicker: false,
                 navigationHelpButton: false,
                 animation: false,
                 timeline: false,
-                fullscreenButton: true,
-                vrButton: false,
-                infoBox: true,
-                selectionIndicator: true
+                fullscreenButton: false,
+                infoBox: false,
+                selectionIndicator: false
             }});
             
-            // Set initial view to India with proper coordinates
+            // Set initial view to show all floats
             viewer.camera.setView({{
-                destination: Cesium.Rectangle.fromDegrees(65.0, 5.0, 95.0, 35.0), // India bounding box
+                destination: Cesium.Cartesian3.fromDegrees(75.0, 15.0, 8000000.0),
                 orientation: {{
-                    heading: Cesium.Math.toRadians(0.0),
-                    pitch: Cesium.Math.toRadians(-90.0),
-                    roll: 0.0
+                    heading: 0,
+                    pitch: -1.57,
+                    roll: 0
                 }}
             }});
             
-            // Ensure the globe is visible
-            viewer.scene.globe.show = true;
-            viewer.scene.globe.enableLighting = true;
-            
             // Float data from Python
-            const floatData = {json.dumps(float_data)};
+            const floatData = {json.dumps(float_data_for_cesium)};
             
-            // Add float markers
-            floatData.forEach(float => {{
-                // Color based on temperature
-                let color;
-                if (float.temp > 30) color = Cesium.Color.RED;
-                else if (float.temp > 28) color = Cesium.Color.ORANGE;
-                else if (float.temp > 26) color = Cesium.Color.YELLOW;
-                else if (float.temp > 24) color = Cesium.Color.LIGHTGREEN;
-                else color = Cesium.Color.LIGHTBLUE;
+            // Batch create entities for better performance
+            const dataSource = new Cesium.CustomDataSource('floats');
+            viewer.dataSources.add(dataSource);
+            
+            floatData.forEach(floatItem => {{
+                const position = Cesium.Cartesian3.fromDegrees(floatItem.lon, floatItem.lat);
                 
-                const entity = viewer.entities.add({{
-                    position: Cesium.Cartesian3.fromDegrees(float.lon, float.lat),
+                const entity = dataSource.entities.add({{
+                    position: position,
                     point: {{
-                        pixelSize: 12,
-                        color: color,
+                        pixelSize: 10,
+                        color: Cesium.Color.fromCssColorString('#ff8c42'),
                         outlineColor: Cesium.Color.WHITE,
                         outlineWidth: 2,
-                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                        scaleByDistance: new Cesium.NearFarScalar(1.5e2, 1.5, 1.5e7, 0.5)
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
                     }},
                     label: {{
-                        text: `Float ${{float.id}}`,
-                        font: '12px sans-serif',
+                        text: floatItem.id,
+                        font: '12pt Inter, sans-serif',
+                        pixelOffset: new Cesium.Cartesian2(0, -20),
                         fillColor: Cesium.Color.WHITE,
                         outlineColor: Cesium.Color.BLACK,
                         outlineWidth: 2,
                         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                        pixelOffset: new Cesium.Cartesian2(0, -32),
-                        show: false
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                        // Show labels only when zoomed in (distance less than 500,000 meters)
+                        distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, 500000.0),
+                        // Enable scaling with distance
+                        scale: 0.5,
+                        // Make labels transparent when far away
+                        translucencyByDistance: new Cesium.NearFarScalar(100000, 1.0, 500000, 0.2)
                     }},
                     description: `
-                        <div style="background: #2d2d2d; padding: 15px; border-radius: 8px; color: white; font-family: 'Inter', sans-serif;">
-                            <h3 style="color: #ff8c42; margin-bottom: 10px;">ARGO Float ${{float.id}}</h3>
-                            <p><strong>Temperature:</strong> ${{float.temp}}°C</p>
-                            <p><strong>Salinity:</strong> ${{float.salinity}} PSU</p>
-                            <p><strong>Max Depth:</strong> ${{float.depth}}m</p>
-                            <p><strong>Status:</strong> ${{float.status}}</p>
-                            <p><strong>Location:</strong> ${{float.lat.toFixed(3)}}°N, ${{float.lon.toFixed(3)}}°E</p>
+                        <div style="font-family: 'Inter', sans-serif; min-width: 200px;">
+                            <b>Float ${{floatItem.id}}</b><br>
+                            <hr style="margin: 5px 0;">
+                            <b>Temperature:</b> ${{floatItem.temp}}°C<br>
+                            <b>Salinity:</b> ${{floatItem.salinity}} PSU<br>
+                            <b>Position:</b> ${{floatItem.lat.toFixed(3)}}, ${{floatItem.lon.toFixed(3)}}
                         </div>
                     `
                 }});
             }});
             
-            // Handle entity selection
-            viewer.selectedEntityChanged.addEventListener((entity) => {{
-                if (entity && entity.label) {{
-                    entity.label.show = true;
+            // Add click event to zoom to float
+            viewer.selectedEntityChanged.addEventListener(function(entity) {{
+                if (Cesium.defined(entity)) {{
+                    viewer.trackedEntity = entity;
+                    
+                    // Fly to the selected entity with a smooth animation
+                    viewer.camera.flyTo({{
+                        destination: entity.position.getValue(viewer.clock.currentTime),
+                        duration: 1.0,
+                        offset: {{
+                            heading: 0,
+                            pitch: -1.0,
+                            range: 100000.0
+                        }}
+                    }});
                 }}
             }});
             
-            // Update metrics periodically
-            setInterval(() => {{
-                const hours = Math.floor(Math.random() * 12) + 1;
-                document.getElementById('lastUpdate').textContent = hours + ' hours ago';
-            }}, 30000);
+            // Add event listener for camera changes to dynamically adjust label visibility
+            viewer.camera.moveEnd.addEventListener(function() {{
+                const cameraHeight = viewer.camera.positionCartographic.height;
+                
+                // Adjust label visibility based on camera height
+                dataSource.entities.values.forEach(function(entity) {{
+                    if (entity.label) {{
+                        // Show labels when zoomed in (camera height less than 1,000,000 meters)
+                        const showLabels = cameraHeight < 1000000;
+                        entity.label.show = showLabels;
+                        
+                        // Adjust label scale based on zoom level
+                        if (showLabels) {{
+                            const scale = Math.max(0.3, Math.min(1.0, 1000000 / cameraHeight));
+                            entity.label.scale = scale;
+                        }}
+                    }}
+                }});
+            }});
         </script>
     </body>
     </html>
     """
     return cesium_html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # System prompt for LLM (from the original code)
 system_prompt = """
@@ -619,7 +618,37 @@ RULES:
 
 Now, generate the appropriate response and SQL query for the following request:
 """
-
+def get_all_float_locations():
+    """Fetch all float locations from the database"""
+    conn = get_db_connection()
+    if conn is None:
+        # Return sample data if DB connection fails
+        sample_data = get_sample_argo_data()
+        latest_positions = sample_data.groupby('platform_number').last().reset_index()
+        return latest_positions[['platform_number', 'latitude', 'longitude', 'temperature', 'salinity']]
+    
+    try:
+        # Query to get the latest position for each float
+        query = """
+        SELECT DISTINCT ON (platform_number) 
+            platform_number, latitude, longitude, temperature, salinity
+        FROM argo_floats 
+        ORDER BY platform_number, measurement_time DESC
+        """
+        df = pd.read_sql_query(query, conn)
+        return df
+    except Exception as e:
+        logger.error(f"Error fetching float locations: {e}")
+        st.error(f"Error fetching float locations: {e}")
+        # Return sample data as fallback
+        sample_data = get_sample_argo_data()
+        latest_positions = sample_data.groupby('platform_number').last().reset_index()
+        return latest_positions[['platform_number', 'latitude', 'longitude', 'temperature', 'salinity']]
+    finally:
+        # Return connection to pool
+        pool = init_db_pool()
+        if pool and conn:
+            pool.putconn(conn)
 def extract_sql(response):
     sql_match = re.search(r'<sql>(.*?)</sql>', response, re.DOTALL)
     if sql_match:
@@ -954,7 +983,6 @@ def main():
     
     # Enhanced 3D Globe Visualization
     st.markdown('<div class="panel-title">🌍 Global ARGO Float Network - 3D Visualization</div>', unsafe_allow_html=True)
-    
     # Prepare data for Cesium (using latest position for each float)
     latest_positions = sample_data.groupby('platform_number').last().reset_index()
     float_data_for_cesium = []
@@ -971,7 +999,7 @@ def main():
         })
     
     # Create and display Cesium map
-    cesium_html = create_enhanced_cesium_map(float_data_for_cesium)
+    cesium_html = create_enhanced_cesium_map()
     components.html(cesium_html, height=600)
     
     # AI Chat Interface
