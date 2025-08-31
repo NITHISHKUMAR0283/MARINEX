@@ -46,302 +46,2186 @@ st.markdown("""
     .stAppViewContainer > .main > div {padding-top: 1rem;}
     
     /* Import fonts */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
     
-    /* Global styles matching the original HTML */
+    /* Global styles */
     * {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        box-sizing: border-box;
     }
     
+    /* Enhanced main header with vibrant gradient */
     .main-header {
-        background: linear-gradient(135deg, #ff8c42, #ff6b35);
-        padding: 2.5rem;
-        border-radius: 12px;
+        background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 25%, #45b7d1 50%, #96ceb4 75%, #ffeaa7 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 8s ease-in-out infinite;
+        padding: 3rem;
+        border-radius: 20px;
         margin-bottom: 2rem;
         color: white;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        box-shadow: 0 20px 60px rgba(255, 107, 107, 0.3);
+        position: relative;
+        overflow: hidden;
+        border: none;
+        transform: perspective(1000px) rotateX(2deg);
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E");
+        animation: floatPattern 20s linear infinite;
+    }
+    
+    @keyframes floatPattern {
+        0% { transform: translateX(0) translateY(0); }
+        25% { transform: translateX(-10px) translateY(-5px); }
+        50% { transform: translateX(10px) translateY(-10px); }
+        75% { transform: translateX(-5px) translateY(-5px); }
+        100% { transform: translateX(0) translateY(0); }
     }
     
     .header-title {
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 3.2rem;
+        font-weight: 900;
         margin: 0 0 0.5rem 0;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.03em;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        position: relative;
+        background: linear-gradient(45deg, #fff, #f0f0f0);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+    
+    @keyframes titleGlow {
+        0% { text-shadow: 0 4px 8px rgba(255,255,255,0.2); }
+        100% { text-shadow: 0 4px 20px rgba(255,255,255,0.4); }
     }
     
     .header-subtitle {
-        font-size: 1.1rem;
-        font-weight: 400;
-        opacity: 0.9;
+        font-size: 1.3rem;
+        font-weight: 500;
+        opacity: 0.95;
         margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        animation: subtitleFloat 4s ease-in-out infinite;
     }
     
+    @keyframes subtitleFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+    }
+    
+    /* Enhanced stats grid with rainbow accent */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin: 2rem 0;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
     }
     
     .metric-card {
-        background: #2d2d2d;
-        border-radius: 12px;
-        padding: 1.8rem;
+        background: linear-gradient(145deg, #2d2d2d, #1a1a1a);
+        border-radius: 20px;
+        padding: 2.5rem;
         color: white;
-        border: 1px solid #404040;
-        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7, #fd79a8);
+        background-size: 200% 100%;
+        animation: rainbowSlide 3s linear infinite;
+    }
+    
+    @keyframes rainbowSlide {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 200% 0%; }
+    }
+    
+    .metric-card::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7, #fd79a8);
+        background-size: 400% 400%;
+        border-radius: 22px;
+        z-index: -1;
+        opacity: 0;
+        animation: gradientRotate 6s ease infinite;
+        transition: opacity 0.4s ease;
+    }
+    
+    @keyframes gradientRotate {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
     }
     
     .metric-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(255, 140, 66, 0.2);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(255, 107, 107, 0.3);
+    }
+    
+    .metric-card:hover::after {
+        opacity: 1;
     }
     
     .metric-label {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #888;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #bbb;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.5rem;
+        letter-spacing: 0.1em;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        transition: color 0.3s ease;
+    }
+    
+    .metric-card:hover .metric-label {
+        color: #4ecdc4;
     }
     
     .metric-value {
-        font-size: 2.25rem;
-        font-weight: 700;
-        color: #ff8c42;
+        font-size: 3rem;
+        font-weight: 900;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         line-height: 1;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.8rem;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        transition: transform 0.3s ease;
+    }
+    
+    .metric-card:hover .metric-value {
+        transform: scale(1.05);
     }
     
     .metric-description {
-        font-size: 0.875rem;
-        color: #888;
+        font-size: 1rem;
+        color: #aaa;
         margin: 0;
+        line-height: 1.6;
+        transition: color 0.3s ease;
     }
     
+    .metric-card:hover .metric-description {
+        color: #ddd;
+    }
+    
+    /* Dynamic live indicator */
     .live-indicator {
         display: inline-block;
-        width: 8px;
-        height: 8px;
-        background: #10b981;
+        width: 12px;
+        height: 12px;
+        background: radial-gradient(circle, #10b981, #059669);
         border-radius: 50%;
-        margin-right: 6px;
-        animation: pulse 2s infinite;
+        margin-right: 10px;
+        animation: livePulse 2s ease-in-out infinite;
+        box-shadow: 0 0 0 rgba(16, 185, 129, 0.6);
+        position: relative;
     }
     
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
+    .live-indicator::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 50%;
+        background: radial-gradient(circle, transparent 40%, #10b981 80%);
+        animation: livePulse 2s ease-in-out infinite 0.5s;
     }
     
-    .cesium-container {
-        height: 600px;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        border: 1px solid #404040;
-        background: #1a1a1a;
+    @keyframes livePulse {
+        0% {
+            transform: scale(0.8);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8);
+        }
+        50% {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 15px rgba(16, 185, 129, 0);
+        }
+        100% {
+            transform: scale(0.8);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
     }
     
-    .chat-interface {
-        background: #2d2d2d;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin: 2rem 0;
-        border: 1px solid #404040;
-        color: white;
-    }
-    
-    .query-input {
-        background: #3a3a3a;
-        border: 1px solid #404040;
-        border-radius: 8px;
-        padding: 1rem;
-        color: white;
-        width: 100%;
-        margin-bottom: 1rem;
-    }
-    
+    /* Spectacular button enhancements */
     .query-button {
-        background: linear-gradient(135deg, #ff8c42, #ff6b35);
+        background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #45b7d1 100%);
+        background-size: 200% 200%;
         border: none;
-        border-radius: 8px;
-        padding: 0.75rem 1.5rem;
+        border-radius: 16px;
+        padding: 1.2rem 2.5rem;
         color: white;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        font-size: 1.1rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
+        animation: buttonBreathe 3s ease-in-out infinite;
+    }
+    
+    @keyframes buttonBreathe {
+        0%, 100% { 
+            background-position: 0% 50%;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+        50% { 
+            background-position: 100% 50%;
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        }
+    }
+    
+    .query-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s ease;
     }
     
     .query-button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+        transform: translateY(-6px) scale(1.05);
+        box-shadow: 0 20px 40px rgba(255, 107, 107, 0.6);
+        background-position: 100% 50%;
     }
     
-    .sample-queries {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
+    .query-button:hover::before {
+        left: 100%;
     }
     
-    .sample-query {
-        background: #3a3a3a;
-        padding: 0.75rem;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s;
-        color: #f5f5f5;
-        text-align: center;
-        border: 1px solid #404040;
+    .query-button:active {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 20px rgba(255, 107, 107, 0.5);
+    }
+    
+    /* Enhanced Streamlit buttons */
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 14px;
+        padding: 1rem 2rem;
+        font-weight: 700;
+        color: white;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stButton > button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-4px) scale(1.03);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    .stButton > button:hover::before {
+        left: 100%;
+    }
+    
+    .stButton > button:active {
+        transform: translateY(-1px) scale(1.01);
+    }
+    
+    /* Global styles */
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        box-sizing: border-box;
+    }
+    
+    /* Ocean animation background */
+    body, .stApp {
+        background: linear-gradient(180deg, #001122 0%, #003366 30%, #004080 60%, #0066cc 100%);
+        position: relative;
+        min-height: 100vh;
+    }
+    
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(ellipse at 20% 50%, rgba(0, 100, 200, 0.3) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 30%, rgba(0, 150, 255, 0.2) 0%, transparent 60%),
+            radial-gradient(ellipse at 40% 80%, rgba(100, 200, 255, 0.1) 0%, transparent 50%);
+        animation: oceanCurrent 20s ease-in-out infinite;
+        pointer-events: none;
+        z-index: -2;
+    }
+    
+    .stApp::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 200%;
+        background-image: 
+            repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 255, 255, 0.03) 2px,
+                rgba(255, 255, 255, 0.03) 4px
+            ),
+            repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 255, 255, 0.02) 2px,
+                rgba(255, 255, 255, 0.02) 4px
+            );
+        animation: oceanWaves 15s linear infinite;
+        pointer-events: none;
+        z-index: -1;
+        transform: translateZ(0);
+    }
+    
+    @keyframes oceanCurrent {
+        0%, 100% { 
+            transform: translateX(0) translateY(0) scale(1);
+            filter: hue-rotate(0deg);
+        }
+        25% { 
+            transform: translateX(-20px) translateY(-10px) scale(1.05);
+            filter: hue-rotate(30deg);
+        }
+        50% { 
+            transform: translateX(20px) translateY(-20px) scale(1.1);
+            filter: hue-rotate(60deg);
+        }
+        75% { 
+            transform: translateX(-10px) translateY(10px) scale(1.05);
+            filter: hue-rotate(30deg);
+        }
+    }
+    
+    @keyframes oceanWaves {
+        0% { transform: translateY(0) rotateZ(0deg); }
+        100% { transform: translateY(-50px) rotateZ(1deg); }
+    }
+    
+    /* Scroll-responsive ocean effect */
+    .ocean-scroll-layer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+                rgba(0, 200, 255, 0.1) 0%, 
+                transparent 50%),
+            linear-gradient(45deg, 
+                transparent 0%, 
+                rgba(100, 200, 255, 0.05) 25%, 
+                transparent 50%, 
+                rgba(0, 150, 255, 0.05) 75%, 
+                transparent 100%);
+        background-size: 200px 200px, 400px 400px;
+        animation: oceanFlow 25s linear infinite;
+        pointer-events: none;
+        z-index: -3;
+        will-change: transform;
+    }
+    
+    @keyframes oceanFlow {
+        0% { 
+            background-position: 0% 0%, 0% 0%;
+            transform: translateY(0) scale(1);
+        }
+        25% { 
+            background-position: 25% 25%, 100% 0%;
+            transform: translateY(-10px) scale(1.02);
+        }
+        50% { 
+            background-position: 50% 50%, 200% 100%;
+            transform: translateY(-20px) scale(1.05);
+        }
+        75% { 
+            background-position: 75% 25%, 100% 200%;
+            transform: translateY(-10px) scale(1.02);
+        }
+        100% { 
+            background-position: 100% 0%, 0% 300%;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Floating bubbles effect */
+    .bubble-layer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+            radial-gradient(circle at 20% 80%, rgba(200, 255, 255, 0.08) 2px, transparent 2px),
+            radial-gradient(circle at 80% 40%, rgba(150, 220, 255, 0.06) 1.5px, transparent 1.5px),
+            radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+            radial-gradient(circle at 90% 10%, rgba(180, 240, 255, 0.07) 2px, transparent 2px);
+        background-size: 300px 300px, 200px 200px, 400px 400px, 250px 250px, 350px 350px;
+        animation: bubbleFloat 30s linear infinite;
+        pointer-events: none;
+        z-index: -4;
+        opacity: 0.6;
+    }
+    
+    @keyframes bubbleFloat {
+        0% { 
+            background-position: 0% 100%, 0% 0%, 0% 100%, 0% 0%, 0% 100%;
+            transform: translateY(0);
+        }
+        100% { 
+            background-position: 100% 0%, 100% 100%, 100% 0%, 100% 100%, 100% 0%;
+            transform: translateY(-100px);
+        }
+    }
+    
+    .sample-query::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+        background-size: 400% 400%;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        animation: gradientShift 4s ease infinite;
+        z-index: -1;
     }
     
     .sample-query:hover {
-        background: #4a4a4a;
-        color: #ff8c42;
-        border-color: #ff8c42;
+        color: white;
+        border-color: transparent;
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(255, 107, 107, 0.3);
     }
     
-    .data-panel {
-        background: #2d2d2d;
-        border-radius: 12px;
+    .sample-query:hover::before {
+        opacity: 0.9;
+    }
+    
+    /* Enhanced download button */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+        background-size: 200% 200%;
+        border: none;
+        border-radius: 14px;
+        color: white;
+        font-weight: 700;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        padding: 1rem 2rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        position: relative;
+        overflow: hidden;
+        animation: downloadPulse 3s ease-in-out infinite;
+    }
+    
+    @keyframes downloadPulse {
+        0%, 100% { 
+            background-position: 0% 50%;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        50% { 
+            background-position: 100% 50%;
+            box-shadow: 0 6px 20px rgba(4, 120, 87, 0.4);
+        }
+    }
+    
+    .stDownloadButton > button::before {
+        content: '⬇';
+        position: absolute;
+        top: 50%;
+        left: 1rem;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .stDownloadButton > button:hover {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 15px 35px rgba(16, 185, 129, 0.6);
+        background-position: 100% 50%;
+    }
+    
+    .stDownloadButton > button:hover::before {
+        transform: translateY(-50%) translateX(2px);
+        animation: downloadBounce 0.6s ease infinite;
+    }
+    
+    @keyframes downloadBounce {
+        0%, 100% { transform: translateY(-50%) translateX(2px); }
+        50% { transform: translateY(-40%) translateX(2px); }
+    }
+    
+    /* Enhanced metric cards with unique colors */
+   
+    
+    /* Enhanced input fields */
+    .query-input {
+        background: linear-gradient(145deg, #3a3a3a, #2d2d2d);
+        border: 2px solid #555;
+        border-radius: 16px;
         padding: 1.5rem;
         color: white;
+        width: 100%;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: inset 0 4px 8px rgba(0,0,0,0.15);
+        position: relative;
+    }
+    
+    .query-input:focus {
+        outline: none;
+        border-color: #4ecdc4;
+        box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.25), inset 0 4px 8px rgba(0,0,0,0.15);
+        transform: scale(1.02);
+        background: linear-gradient(145deg, #404040, #353535);
+    }
+    
+    /* Enhanced panels */
+    .data-panel {
+        background: linear-gradient(145deg, #2d2d2d, #1e1e1e);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
         border: 1px solid #404040;
-        margin: 1rem 0;
+        margin: 2rem 0;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .data-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 20%, rgba(255, 107, 107, 0.05) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 80%, rgba(78, 205, 196, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    
+    .data-panel:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     }
     
     .panel-title {
-        color: #ff8c42;
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        border-bottom: 2px solid #404040;
-        padding-bottom: 0.5rem;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
+        border-bottom: 3px solid transparent;
+        border-image: linear-gradient(90deg, #ff6b6b, #4ecdc4) 1;
+        padding-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        animation: titleShimmer 3s ease-in-out infinite;
     }
     
-    .stTab {
-        background: #2d2d2d;
+    @keyframes titleShimmer {
+        0%, 100% { filter: brightness(1); }
+        50% { filter: brightness(1.2); }
+    }
+    
+    /* Enhanced NASA panel */
+    .nasa-panel {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 25%, #60a5fa 50%, #93c5fd 75%, #dbeafe 100%);
+        background-size: 300% 300%;
+        animation: nasaGradient 6s ease infinite;
+        border-radius: 20px;
+        padding: 2.5rem;
         color: white;
+        margin: 2rem 0;
+        box-shadow: 0 15px 45px rgba(59, 130, 246, 0.3);
+        border: none;
+        position: relative;
+        overflow: hidden;
+        transform: perspective(1000px) rotateX(1deg);
     }
     
+    @keyframes nasaGradient {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    .nasa-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        animation: starTwinkle 4s linear infinite;
+    }
+    
+    @keyframes starTwinkle {
+        0%, 100% { opacity: 0.05; transform: rotate(0deg); }
+        50% { opacity: 0.15; transform: rotate(180deg); }
+    }
+    
+    /* Enhanced status indicators */
+    .api-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        gap: 0.6rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        animation: statusGlow 2s ease-in-out infinite;
+    }
+    
+    .status-active {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.3));
+        color: #10b981;
+        border: 2px solid rgba(16, 185, 129, 0.4);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    }
+    
+    .status-active:hover {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.4));
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        transform: scale(1.05);
+    }
+    
+    .status-inactive {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.3));
+        color: #f59e0b;
+        border: 2px solid rgba(245, 158, 11, 0.4);
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+    }
+    
+    .status-inactive:hover {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.4));
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+        transform: scale(1.05);
+    }
+    
+    @keyframes statusGlow {
+        0%, 100% { box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
+        50% { box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+    }
+    
+    /* Enhanced cesium container */
+    .cesium-container {
+        height: 650px;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        border: 2px solid transparent;
+        background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+        margin: 2rem 0;
+        position: relative;
+        transition: all 0.4s ease;
+    }
+    
+    .cesium-container::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+        background-size: 400% 400%;
+        border-radius: 22px;
+        z-index: -1;
+        animation: borderGlow 8s ease infinite;
+    }
+    
+    @keyframes borderGlow {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    .cesium-container:hover {
+        transform: scale(1.01);
+        box-shadow: 0 25px 70px rgba(0,0,0,0.3);
+    }
+    
+    /* Enhanced chat interface */
+    .chat-interface {
+        background: linear-gradient(145deg, #2d2d2d, #1e1e1e);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin: 2.5rem 0;
+        border: 2px solid transparent;
+        color: white;
+        box-shadow: 0 15px 45px rgba(0,0,0,0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .chat-interface::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+        background-size: 400% 400%;
+        border-radius: 22px;
+        z-index: -1;
+        animation: chatBorderFlow 10s ease infinite;
+    }
+    
+    @keyframes chatBorderFlow {
+        0%, 100% { background-position: 0% 50%; }
+        25% { background-position: 100% 0%; }
+        50% { background-position: 100% 100%; }
+        75% { background-position: 0% 100%; }
+    }
+    
+    /* Enhanced tabs with neon effect */
     .stTabs [data-baseweb="tab-list"] {
-        background: #2d2d2d;
-        border-bottom: 1px solid #404040;
+        gap: 12px;
+        background: linear-gradient(145deg, #2d2d2d, #1e1e1e);
+        border-bottom: 2px solid #404040;
+        padding: 0.5rem;
+        border-radius: 16px 16px 0 0;
     }
     
     .stTabs [data-baseweb="tab"] {
-        background: #2d2d2d;
+        background: linear-gradient(145deg, #3a3a3a, #2d2d2d);
         color: #888;
-        border-color: #404040;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: #3a3a3a;
-        color: #ff8c42;
-        border-color: #ff8c42;
-    }
-    
-    .stDataFrame {
-        background: #2d2d2d;
-        border-radius: 8px;
-    }
-    
-    .nasa-panel {
-        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
         border-radius: 12px;
-        padding: 1.5rem;
-        color: white;
-        margin: 1rem 0;
-    }
-    
-    .api-status {
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.75rem;
+        border: 2px solid transparent;
+        padding: 1rem 2rem;
         font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
     
-    .status-active {
-        background: #10b981;
+    .stTabs [data-baseweb="tab"]::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
+        color: #4ecdc4;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(78, 205, 196, 0.2);
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover::before {
+        left: 100%;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+        color: white;
+        border-color: #4ecdc4;
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(78, 205, 196, 0.4);
+        animation: tabGlow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes tabGlow {
+        0% { box-shadow: 0 12px 30px rgba(78, 205, 196, 0.4); }
+        100% { box-shadow: 0 12px 30px rgba(78, 205, 196, 0.6); }
+    }
+    
+    /* Enhanced data tables with ocean glass effect */
+    .stDataFrame {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 2px solid rgba(255,215,0,0.3);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        animation: tableFloat 8s ease-in-out infinite;
+    }
+    
+    @keyframes tableFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    
+    .stDataFrame:hover {
+        border-color: #FFD700;
+        box-shadow: 0 25px 60px rgba(255, 215, 0, 0.2);
+        transform: translateY(-12px);
+    }
+    
+    /* Enhanced select boxes */
+    .stSelectbox > div > div {
+        background: linear-gradient(135deg, #FFD700 0%, #FFFFFF 30%, #FFF8DC 60%, #FFEB3B 100%);
+        border: 2px solid rgba(255,215,0,0.4);
+        border-radius: 16px;
+        color: #004080;
+        font-weight: 600;
+        transition: all 0.4s ease;
+        box-shadow: 0 6px 20px rgba(255, 215, 0, 0.2);
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        animation: selectFloat 7s ease-in-out infinite;
+    }
+    
+    @keyframes selectFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+    
+    .stSelectbox > div > div:hover {
+        border-color: #FFFFFF;
+        box-shadow: 0 12px 30px rgba(255, 215, 0, 0.4);
+        transform: translateY(-10px) scale(1.02);
+    }
+    
+    /* Enhanced multiselect */
+    .stMultiSelect > div > div {
+        background: linear-gradient(135deg, #FFD700 0%, #FFFFFF 30%, #FFF8DC 60%, #FFEB3B 100%);
+        border: 2px solid rgba(255,215,0,0.4);
+        border-radius: 16px;
+        color: #004080;
+        font-weight: 600;
+        transition: all 0.4s ease;
+        box-shadow: 0 6px 20px rgba(255, 215, 0, 0.2);
+        min-height: 60px;
+        animation: multiselectFloat 6s ease-in-out infinite;
+    }
+    
+    @keyframes multiselectFloat {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-7px) rotate(0.2deg); }
+    }
+    
+    .stMultiSelect > div > div:hover {
+        border-color: #FFFFFF;
+        box-shadow: 0 12px 30px rgba(255, 215, 0, 0.4);
+        transform: translateY(-12px) scale(1.03);
+    }
+    
+    /* Enhanced expander with wave animation */
+    .streamlit-expanderHeader {
+        background: linear-gradient(135deg, #FFD700 0%, #FFFFFF 50%, #FFEB3B 100%);
+        border-radius: 18px;
+        padding: 1.5rem;
+        border: 2px solid rgba(255,215,0,0.4);
+        font-weight: 700;
+        color: #004080;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        animation: expanderFloat 8s ease-in-out infinite;
+    }
+    
+    @keyframes expanderFloat {
+        0%, 100% { 
+            transform: translateY(0) rotate(0deg);
+        }
+        50% { 
+            transform: translateY(-10px) rotate(0.3deg);
+        }
+    }
+    
+    .streamlit-expanderHeader:hover {
+        transform: translateY(-15px) scale(1.03) rotate(0.5deg);
+        box-shadow: 0 20px 50px rgba(255, 215, 0, 0.5);
+        background: linear-gradient(135deg, #FFEB3B 0%, #FFFFFF 50%, #FFD700 100%);
+        animation: expanderWaveFloat 2s ease-in-out infinite;
+    }
+    
+    @keyframes expanderWaveFloat {
+        0%, 100% { 
+            transform: translateY(-15px) scale(1.03) rotate(0.5deg);
+        }
+        50% { 
+            transform: translateY(-22px) scale(1.05) rotate(-0.2deg);
+        }
+    }
+    
+    .streamlit-expanderContent {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 0 0 18px 18px;
+        padding: 2rem;
+        border: 2px solid rgba(255,215,0,0.3);
+        border-top: none;
+        animation: contentWave 0.8s ease-out;
         color: white;
     }
     
-    .status-inactive {
-        background: #f59e0b;
+    @keyframes contentWave {
+        0% { 
+            opacity: 0; 
+            transform: translateY(-20px) scale(0.95); 
+        }
+        100% { 
+            opacity: 1; 
+            transform: translateY(0) scale(1); 
+        }
+    }
+    
+    /* Enhanced sidebar with ocean theme */
+    .css-1d391kg {
+        background: linear-gradient(180deg, rgba(0, 61, 130, 0.8), rgba(0, 100, 200, 0.6));
+        backdrop-filter: blur(25px);
+        border-right: 2px solid rgba(255,215,0,0.3);
+    }
+    
+    /* Enhanced code blocks */
+    .stCodeBlock {
+        border-radius: 18px;
+        border: 2px solid rgba(255,215,0,0.3);
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(20px);
+        transition: all 0.3s ease;
+        animation: codeFloat 10s ease-in-out infinite;
+    }
+    
+    @keyframes codeFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    
+    .stCodeBlock:hover {
+        border-color: #FFD700;
+        box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
+        transform: translateY(-12px);
+    }
+    
+    code {
+        font-family: 'JetBrains Mono', monospace;
+        background: rgba(255, 215, 0, 0.2);
+        padding: 6px 10px;
+        border-radius: 8px;
+        color: #FFD700;
+        font-size: 0.95em;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    code:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: #004080;
+        transform: scale(1.05);
+    }
+    
+    pre {
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(15px);
+        border-radius: 15px;
+        padding: 2rem;
+        border: 2px solid rgba(255,215,0,0.3);
+        overflow-x: auto;
+        transition: all 0.3s ease;
         color: white;
+    }
+    
+    pre:hover {
+        border-color: #FFD700;
+        box-shadow: 0 12px 35px rgba(255, 215, 0, 0.2);
+    }
+    
+    /* Status indicators with ocean theme */
+    .api-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 18px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        gap: 0.6rem;
+        transition: all 0.4s ease;
+        cursor: pointer;
+        min-height: 40px;
+        animation: statusFloat 6s ease-in-out infinite;
+    }
+    
+    @keyframes statusFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    
+    .status-active {
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), rgba(0, 204, 102, 0.4));
+        color: #00FF88;
+        border: 2px solid rgba(0, 255, 136, 0.5);
+        box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
+        backdrop-filter: blur(15px);
+    }
+    
+    .status-active:hover {
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.4), rgba(0, 204, 102, 0.5));
+        box-shadow: 0 12px 30px rgba(0, 255, 136, 0.4);
+        transform: translateY(-8px) scale(1.05);
+    }
+    
+    .status-inactive {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.3), rgba(255, 152, 0, 0.4));
+        color: #FFC107;
+        border: 2px solid rgba(255, 193, 7, 0.5);
+        box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
+        backdrop-filter: blur(15px);
+    }
+    
+    .status-inactive:hover {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.4), rgba(255, 152, 0, 0.5));
+        box-shadow: 0 12px 30px rgba(255, 193, 7, 0.4);
+        transform: translateY(-8px) scale(1.05);
+    }
+    
+    /* Enhanced ag-grid styling with ocean theme */
+    .ag-theme-alpine-dark {
+        --ag-background-color: rgba(0, 0, 0, 0.2);
+        --ag-border-color: rgba(255,215,0,0.3);
+        --ag-header-background-color: rgba(255, 215, 0, 0.2);
+        --ag-odd-row-background-color: rgba(255, 255, 255, 0.05);
+        --ag-row-hover-color: rgba(255, 215, 0, 0.1);
+        --ag-header-column-separator-color: #FFD700;
+        border-radius: 20px;
+        border: 2px solid rgba(255,215,0,0.3);
+        box-shadow: 0 15px 45px rgba(0,0,0,0.2);
+        backdrop-filter: blur(20px);
+        transition: all 0.3s ease;
+    }
+    
+    .ag-theme-alpine-dark:hover {
+        border-color: #FFD700;
+        box-shadow: 0 25px 60px rgba(255, 215, 0, 0.2);
+        transform: translateY(-5px);
+    }
+    
+    /* Enhanced tooltips with ocean theme */
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 250px;
+        background: rgba(0, 61, 130, 0.9);
+        backdrop-filter: blur(25px);
+        color: white;
+        text-align: center;
+        border-radius: 15px;
+        padding: 18px;
+        position: absolute;
+        z-index: 1000;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -125px;
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 2px solid rgba(255,215,0,0.4);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        transform: translateY(15px) scale(0.8);
+    }
+    
+    .tooltip .tooltiptext::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -10px;
+        border-width: 10px;
+        border-style: solid;
+        border-color: rgba(255,215,0,0.4) transparent transparent transparent;
+    }
+    
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        animation: tooltipWave 2s ease-in-out infinite;
+    }
+    
+    @keyframes tooltipWave {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-5px) scale(1.02); }
+    }
+    
+    /* Enhanced success/error messages */
+    .stSuccess {
+        background: rgba(0, 255, 136, 0.15);
+        backdrop-filter: blur(20px);
+        border: 2px solid #00FF88;
+        border-radius: 16px;
+        animation: successWave 3s ease-in-out infinite;
+        color: white;
+    }
+    
+    @keyframes successWave {
+        0%, 100% { 
+            box-shadow: 0 0 0 rgba(0, 255, 136, 0.4);
+            transform: translateY(0);
+        }
+        50% { 
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+            transform: translateY(-5px);
+        }
+    }
+    
+    .stError {
+        background: rgba(255, 68, 68, 0.15);
+        backdrop-filter: blur(20px);
+        border: 2px solid #FF4444;
+        border-radius: 16px;
+        animation: errorBob 2s ease-in-out infinite;
+        color: white;
+    }
+    
+    @keyframes errorBob {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        25% { transform: translateY(-3px) rotate(0.5deg); }
+        75% { transform: translateY(-3px) rotate(-0.5deg); }
+    }
+    
+    /* Progress bar with ocean wave */
+    .stProgress > div > div {
+        background: linear-gradient(90deg, #FFD700, #FFFFFF, #FFEB3B, #FFD700) !important;
+        background-size: 300% 100%;
+        animation: progressWave 2.5s linear infinite;
+        border-radius: 12px;
+        height: 15px !important;
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    }
+    
+    @keyframes progressWave {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 300% 0%; }
+    }
+    
+    /* Custom scrollbar with ocean theme */
+    ::-webkit-scrollbar {
+        width: 14px;
+        height: 14px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: rgba(0, 61, 130, 0.3);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(45deg, #FFD700, #FFFFFF);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,215,0,0.3);
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(45deg, #FFFFFF, #FFD700);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        transform: scale(1.1);
     }
     
     /* Mobile responsiveness */
     @media (max-width: 768px) {
         .stats-grid {
             grid-template-columns: 1fr;
+            gap: 1.5rem;
         }
+        
         .cesium-container {
-            height: 400px;
+            height: 450px;
+            border-radius: 20px;
         }
-        .chat-interface {
-            width: 90%;
-            right: 5%;
-        }
+        
         .main-header {
-            padding: 1.5rem;
+            padding: 2rem;
+            border-radius: 20px;
         }
+        
         .header-title {
-            font-size: 2rem;
+            font-size: 2.5rem;
+        }
+        
+        .header-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .metric-card {
+            padding: 2rem;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+        }
+        
+        .sample-queries {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .sample-query {
+            height: 80px;
+            font-size: 0.9rem;
+            padding: 1rem;
+        }
+        
+        .data-panel, .chat-interface {
+            padding: 2rem;
+        }
+        
+        .query-button, 
+        .stButton > button, 
+        .stDownloadButton > button {
+            min-height: 50px;
+            padding: 1rem 1.5rem;
+            font-size: 0.9rem;
         }
     }
     
-    /* Tooltip styles */
-    .tooltip {
-        position: relative;
-        display: inline-block;
-    }
-    
-    .tooltip .tooltiptext {
-        visibility: hidden;
-        width: 200px;
-        background-color: #2d2d2d;
-        color: white;
-        text-align: center;
-        border-radius: 6px;
-        padding: 5px;
-        position: absolute;
-        z-index: 1;
-        bottom: 125%;
-        left: 50%;
-        margin-left: -100px;
-        opacity: 0;
-        transition: opacity 0.3s;
-        border: 1px solid #404040;
-    }
-    
-    .tooltip:hover .tooltiptext {
-        visibility: visible;
-        opacity: 1;
+    @media (max-width: 480px) {
+        .sample-queries {
+            grid-template-columns: 1fr;
+        }
+        
+        .sample-query {
+            height: 70px;
+            font-size: 0.85rem;
+        }
+        
+        body, .stApp {
+            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 30%, #1E90FF 70%, #003D82 100%);
+        }
     }
     
     /* Accessibility improvements */
     @media (prefers-reduced-motion: reduce) {
-        * {
+        *, *::before, *::after {
             animation-duration: 0.01ms !important;
             animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
         }
     }
     
-    /* Focus indicators for accessibility */
+    /* Enhanced focus indicators */
     button:focus, input:focus, select:focus, textarea:focus {
-        outline: 2px solid #ff8c42;
-        outline-offset: 2px;
+        outline: 3px solid #FFD700;
+        outline-offset: 3px;
+        box-shadow: 0 0 0 6px rgba(255, 215, 0, 0.3);
+    }
+    
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+        .main-header, .metric-card, .data-panel {
+            border: 3px solid white;
+        }
+        
+        .query-button, .stButton > button {
+            border: 3px solid #FFD700;
+        }
+    }
+    
+    /* Ocean depth scroll effect */
+    @media (min-width: 769px) {
+        .stApp {
+            background-attachment: fixed;
+        }
+    }
+    
+    /* Initialize ocean bubble layer */
+    .stApp {
+        position: relative;
+    }
+    
+    .stApp .ocean-bubbles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle 4px at 15% 25%, rgba(255,255,255,0.4), transparent),
+            radial-gradient(circle 2px at 85% 35%, rgba(255,255,255,0.3), transparent),
+            radial-gradient(circle 6px at 45% 75%, rgba(255,255,255,0.5), transparent),
+            radial-gradient(circle 3px at 75% 85%, rgba(255,255,255,0.3), transparent),
+            radial-gradient(circle 5px at 25% 95%, rgba(255,255,255,0.4), transparent),
+            radial-gradient(circle 2px at 95% 15%, rgba(255,255,255,0.2), transparent);
+        background-size: 500px 500px, 300px 300px, 700px 700px, 400px 400px, 600px 600px, 200px 200px;
+        animation: bubbleRise 20s linear infinite;
+        pointer-events: none;
+        z-index: -1;
+    }
+</style>
+
+<script>
+// Ocean bubble layer injection
+document.addEventListener('DOMContentLoaded', function() {
+    const app = document.querySelector('.stApp');
+    if (app && !app.querySelector('.ocean-bubbles')) {
+        const bubbleLayer = document.createElement('div');
+        bubbleLayer.className = 'ocean-bubbles';
+        app.appendChild(bubbleLayer);
+    }
+});
+
+// Scroll-responsive ocean effects
+let ticking = false;
+function updateOcean() {
+    const scrolled = window.pageYOffset;
+    const rate = scrolled * -0.3;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    const scrollPercent = Math.min(scrolled / maxScroll, 1);
+    
+    // Change ocean depth and color based on scroll
+    const hueShift = scrollPercent * 40;
+    const brightness = 1 - (scrollPercent * 0.3);
+    const saturation = 1 + (scrollPercent * 0.5);
+    
+    document.body.style.filter = `hue-rotate(${hueShift}deg) brightness(${brightness}) saturate(${saturation})`;
+    
+    // Move bubble layer with scroll
+    const bubbleLayer = document.querySelector('.ocean-bubbles');
+    if (bubbleLayer) {
+        bubbleLayer.style.transform = `translateY(${rate}px) scale(${1 + scrollPercent * 0.1})`;
+    }
+    
+    ticking = false;
+}
+
+function requestTick() {
+    if (!ticking) {
+        requestAnimationFrame(updateOcean);
+        ticking = true;
+    }
+}
+
+window.addEventListener('scroll', requestTick);
+</script>
+""", unsafe_allow_html=True)# Enhanced CSS with Ocean Waves and Yellow-White Floating Buttons
+st.markdown("""
+<style>
+    /* Hide Streamlit UI elements */
+    #MainMenu {visibility: hidden;}
+    .stDeployButton {display: none;}
+    footer {visibility: hidden;}
+    .stActionButton {display: none;}
+    header {visibility: hidden;}
+    .viewerBadge_container__1QSob {display: none;}
+    .stAppViewContainer > .main > div {padding-top: 1rem;}
+    
+    /* Import fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+    
+    /* Global styles with ocean background */
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        box-sizing: border-box;
+    }
+    
+    /* Ocean wave background */
+    body, .stApp {
+        background: linear-gradient(180deg, #87CEEB 0%, #4682B4 25%, #1E90FF 50%, #0066CC 75%, #003D82 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+    }
+    
+    /* Animated ocean waves */
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 200%;
+        height: 100%;
+        background: 
+            radial-gradient(ellipse 800px 50px at 400px 50px, rgba(255,255,255,0.3), transparent),
+            radial-gradient(ellipse 600px 40px at 200px 150px, rgba(255,255,255,0.2), transparent),
+            radial-gradient(ellipse 700px 45px at 600px 250px, rgba(255,255,255,0.25), transparent),
+            radial-gradient(ellipse 500px 35px at 800px 350px, rgba(255,255,255,0.2), transparent),
+            radial-gradient(ellipse 900px 60px at 300px 450px, rgba(255,255,255,0.3), transparent);
+        animation: oceanWaves 12s ease-in-out infinite;
+        pointer-events: none;
+        z-index: -2;
+        opacity: 0.6;
+    }
+    
+    @keyframes oceanWaves {
+        0%, 100% { 
+            transform: translateX(0) translateY(0);
+        }
+        25% { 
+            transform: translateX(-100px) translateY(-20px);
+        }
+        50% { 
+            transform: translateX(-200px) translateY(-40px);
+        }
+        75% { 
+            transform: translateX(-300px) translateY(-20px);
+        }
+    }
+    
+    /* Deeper wave layers */
+    .stApp::after {
+        content: '';
+        position: fixed;
+        top: 50px;
+        left: 0;
+        width: 200%;
+        height: 100%;
+        background: 
+            radial-gradient(ellipse 600px 30px at 500px 100px, rgba(255,255,255,0.15), transparent),
+            radial-gradient(ellipse 800px 40px at 100px 200px, rgba(255,255,255,0.1), transparent),
+            radial-gradient(ellipse 400px 25px at 700px 300px, rgba(255,255,255,0.12), transparent),
+            radial-gradient(ellipse 650px 35px at 200px 400px, rgba(255,255,255,0.08), transparent);
+        animation: deepWaves 18s ease-in-out infinite reverse;
+        pointer-events: none;
+        z-index: -3;
+        opacity: 0.4;
+    }
+    
+    @keyframes deepWaves {
+        0%, 100% { 
+            transform: translateX(0) translateY(10px);
+        }
+        33% { 
+            transform: translateX(-150px) translateY(-10px);
+        }
+        66% { 
+            transform: translateX(-250px) translateY(5px);
+        }
+    }
+    
+    /* Underwater bubbles */
+    .ocean-bubbles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle 3px at 10% 20%, rgba(255,255,255,0.3), transparent),
+            radial-gradient(circle 2px at 80% 30%, rgba(255,255,255,0.2), transparent),
+            radial-gradient(circle 4px at 40% 70%, rgba(255,255,255,0.25), transparent),
+            radial-gradient(circle 2px at 90% 80%, rgba(255,255,255,0.2), transparent),
+            radial-gradient(circle 3px at 20% 90%, rgba(255,255,255,0.3), transparent);
+        background-size: 400px 400px, 300px 300px, 500px 500px, 200px 200px, 350px 350px;
+        animation: bubbleRise 15s linear infinite;
+        pointer-events: none;
+        z-index: -1;
+    }
+    
+    @keyframes bubbleRise {
+        0% { 
+            background-position: 0% 100%, 0% 100%, 0% 100%, 0% 100%, 0% 100%;
+            opacity: 0.6;
+        }
+        50% {
+            opacity: 0.8;
+        }
+        100% { 
+            background-position: 100% -100%, -100% -100%, 50% -100%, 200% -100%, -50% -100%;
+            opacity: 0.6;
+        }
+    }
+    
+    /* Enhanced main header */
+    .main-header {
+        background: linear-gradient(135deg, rgba(255,215,0,0.9) 0%, rgba(255,255,255,0.8) 50%, rgba(255,235,59,0.9) 100%);
+        backdrop-filter: blur(20px);
+        padding: 3rem;
+        border-radius: 25px;
+        margin-bottom: 2rem;
+        color: #003D82;
+        box-shadow: 0 20px 60px rgba(255, 215, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid rgba(255,255,255,0.3);
+        animation: headerFloat 6s ease-in-out infinite;
+    }
+    
+    @keyframes headerFloat {
+        0%, 100% { 
+            transform: translateY(0) rotate(0deg);
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.3);
+        }
+        50% { 
+            transform: translateY(-10px) rotate(0.5deg);
+            box-shadow: 0 30px 80px rgba(255, 215, 0, 0.4);
+        }
+    }
+    
+    .header-title {
+        font-size: 3.2rem;
+        font-weight: 900;
+        margin: 0 0 0.5rem 0;
+        letter-spacing: -0.03em;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        position: relative;
+        color: #003D82;
+        animation: titleWave 4s ease-in-out infinite;
+    }
+    
+    @keyframes titleWave {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    
+    .header-subtitle {
+        font-size: 1.3rem;
+        font-weight: 500;
+        opacity: 0.8;
+        margin: 0;
+        color: #004080;
+        animation: subtitleFloat 5s ease-in-out infinite;
+    }
+    
+    @keyframes subtitleFloat {
+        0%, 100% { transform: translateY(0) translateX(0); }
+        33% { transform: translateY(-3px) translateX(2px); }
+        66% { transform: translateY(3px) translateX(-2px); }
+    }
+    
+    /* Unified button styling - all buttons same size with yellow-white theme */
+    .query-button, 
+    .stButton > button, 
+    .stDownloadButton > button,
+    .sample-query {
+        background: linear-gradient(135deg, #FFD700 0%, #FFFFFF 30%, #FFF8DC 60%, #FFEB3B 100%);
+        background-size: 300% 300%;
+        border: 2px solid rgba(255,215,0,0.4);
+        border-radius: 18px;
+        padding: 1.2rem 2rem;
+        color: #004080;
+        font-weight: 700;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        animation: buttonFloat 4s ease-in-out infinite;
+        backdrop-filter: blur(10px);
+    }
+    
+    @keyframes buttonFloat {
+        0%, 100% { 
+            transform: translateY(0) rotate(0deg);
+            background-position: 0% 50%;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+        }
+        25% { 
+            transform: translateY(-5px) rotate(0.5deg);
+            background-position: 50% 0%;
+            box-shadow: 0 12px 35px rgba(255, 215, 0, 0.4);
+        }
+        50% { 
+            transform: translateY(-8px) rotate(0deg);
+            background-position: 100% 50%;
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.5);
+        }
+        75% { 
+            transform: translateY(-3px) rotate(-0.5deg);
+            background-position: 50% 100%;
+            box-shadow: 0 12px 35px rgba(255, 215, 0, 0.4);
+        }
+    }
+    
+    /* Wave animation on button surfaces */
+    .query-button::before, 
+    .stButton > button::before, 
+    .stDownloadButton > button::before,
+    .sample-query::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255,255,255,0.4), 
+            transparent);
+        animation: waveRipple 3s ease-in-out infinite;
+        transition: left 0.6s ease;
+    }
+    
+    @keyframes waveRipple {
+        0% { left: -100%; }
+        50% { left: 0%; }
+        100% { left: 100%; }
+    }
+    
+    /* Enhanced hover effects for floating in waves */
+    .query-button:hover, 
+    .stButton > button:hover, 
+    .stDownloadButton > button:hover,
+    .sample-query:hover {
+        transform: translateY(-12px) scale(1.05) rotate(1deg);
+        box-shadow: 0 20px 50px rgba(255, 215, 0, 0.6);
+        background: linear-gradient(135deg, #FFEB3B 0%, #FFFFFF 50%, #FFD700 100%);
+        border-color: rgba(255,255,255,0.8);
+        animation: floatingWave 2s ease-in-out infinite;
+    }
+    
+    @keyframes floatingWave {
+        0%, 100% { 
+            transform: translateY(-12px) scale(1.05) rotate(1deg);
+        }
+        50% { 
+            transform: translateY(-18px) scale(1.08) rotate(-0.5deg);
+        }
+    }
+    
+    .query-button:active, 
+    .stButton > button:active, 
+    .stDownloadButton > button:active,
+    .sample-query:active {
+        transform: translateY(-6px) scale(1.02);
+        animation: buttonSplash 0.3s ease-out;
+    }
+    
+    @keyframes buttonSplash {
+        0% { box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3); }
+        50% { box-shadow: 0 15px 40px rgba(255, 255, 255, 0.6); }
+        100% { box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3); }
+    }
+    
+    /* Enhanced stats grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+    
+    .metric-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        padding: 2.5rem;
+        color: white;
+        border: 2px solid rgba(255,255,255,0.2);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        animation: cardFloat 8s ease-in-out infinite;
+    }
+    
+    @keyframes cardFloat {
+        0%, 100% { 
+            transform: translateY(0) rotate(0deg);
+        }
+        25% { 
+            transform: translateY(-8px) rotate(0.5deg);
+        }
+        50% { 
+            transform: translateY(-15px) rotate(0deg);
+        }
+        75% { 
+            transform: translateY(-5px) rotate(-0.5deg);
+        }
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #FFD700, #FFFFFF, #FFEB3B);
+        background-size: 200% 100%;
+        animation: waveShimmer 4s linear infinite;
+    }
+    
+    @keyframes waveShimmer {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 200% 0%; }
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-15px) scale(1.03) rotate(1deg);
+        box-shadow: 0 25px 60px rgba(255, 215, 0, 0.3);
+        border-color: rgba(255,255,255,0.5);
+        animation: cardWaveFloat 3s ease-in-out infinite;
+    }
+    
+    @keyframes cardWaveFloat {
+        0%, 100% { 
+            transform: translateY(-15px) scale(1.03) rotate(1deg);
+        }
+        50% { 
+            transform: translateY(-22px) scale(1.05) rotate(-0.5deg);
+        }
+    }
+    
+    .metric-label {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #E6F3FF;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        transition: color 0.3s ease;
+    }
+    
+    .metric-card:hover .metric-label {
+        color: #FFD700;
+    }
+    
+    .metric-value {
+        font-size: 3rem;
+        font-weight: 900;
+        background: linear-gradient(45deg, #FFD700, #FFFFFF);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+        margin-bottom: 0.8rem;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        transition: transform 0.3s ease;
+        animation: valueGlow 3s ease-in-out infinite;
+    }
+    
+    @keyframes valueGlow {
+        0%, 100% { filter: brightness(1); }
+        50% { filter: brightness(1.2); }
+    }
+    
+    .metric-card:hover .metric-value {
+        transform: scale(1.08);
+        animation: valueWave 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes valueWave {
+        0%, 100% { transform: scale(1.08) translateY(0); }
+        50% { transform: scale(1.1) translateY(-3px); }
+    }
+    
+    .metric-description {
+        font-size: 1rem;
+        color: #B3D9FF;
+        margin: 0;
+        line-height: 1.6;
+        transition: color 0.3s ease;
+    }
+    
+    .metric-card:hover .metric-description {
+        color: #FFFFFF;
+    }
+    
+    /* Dynamic live indicator with ocean theme */
+    .live-indicator {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        background: radial-gradient(circle, #00FF88, #00CC66);
+        border-radius: 50%;
+        margin-right: 10px;
+        animation: oceanPulse 2.5s ease-in-out infinite;
+        box-shadow: 0 0 0 rgba(0, 255, 136, 0.6);
+        position: relative;
+    }
+    
+    .live-indicator::after {
+        content: '';
+        position: absolute;
+        top: -3px;
+        left: -3px;
+        right: -3px;
+        bottom: -3px;
+        border-radius: 50%;
+        background: radial-gradient(circle, transparent 40%, #00FF88 80%);
+        animation: oceanRipple 2.5s ease-in-out infinite 0.8s;
+    }
+    
+    @keyframes oceanPulse {
+        0% {
+            transform: scale(0.9);
+            box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.8);
+        }
+        50% {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 20px rgba(0, 255, 136, 0);
+        }
+        100% {
+            transform: scale(0.9);
+            box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+        }
+    }
+    
+    @keyframes oceanRipple {
+        0% {
+            transform: scale(0.5);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(2);
+            opacity: 0;
+        }
+    }
+    
+    /* Sample queries with consistent sizing and wave floating */
+    .sample-queries {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .sample-query {
+        height: 100px;
+        animation-delay: calc(var(--index, 0) * 0.2s);
+    }
+    
+    .sample-query:nth-child(1) { --index: 0; }
+    .sample-query:nth-child(2) { --index: 1; }
+    .sample-query:nth-child(3) { --index: 2; }
+    .sample-query:nth-child(4) { --index: 3; }
+    
+    /* Enhanced input fields with ocean theme */
+    .query-input {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(20px);
+        border: 2px solid rgba(255,215,0,0.3);
+        border-radius: 18px;
+        padding: 1.5rem;
+        color: white;
+        width: 100%;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        position: relative;
+        animation: inputFloat 6s ease-in-out infinite;
+    }
+    
+    @keyframes inputFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    
+    .query-input:focus {
+        outline: none;
+        border-color: #FFD700;
+        box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.25), 0 15px 35px rgba(255,215,0,0.2);
+        transform: translateY(-8px) scale(1.02);
+        background: rgba(255, 255, 255, 0.25);
+    }
+    
+    .query-input::placeholder {
+        color: rgba(255,255,255,0.7);
+    }
+    
+    /* Enhanced panels with ocean glass effect */
+    .data-panel {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(25px);
+        border-radius: 25px;
+        padding: 2.5rem;
+        color: white;
+        border: 2px solid rgba(255,255,255,0.2);
+        margin: 2rem 0;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s ease;
+        animation: panelFloat 10s ease-in-out infinite;
+    }
+    
+    @keyframes panelFloat {
+        0%, 100% { 
+            transform: translateY(0) rotate(0deg);
+        }
+        33% { 
+            transform: translateY(-8px) rotate(0.3deg);
+        }
+        66% { 
+            transform: translateY(-12px) rotate(-0.3deg);
+        }
+    }
+    
+    .data-panel:hover {
+        transform: translateY(-15px) rotate(0.5deg);
+        box-shadow: 0 30px 70px rgba(255, 215, 0, 0.2);
+        border-color: rgba(255,215,0,0.4);
+    }
+    
+    .panel-title {
+        background: linear-gradient(45deg, #FFD700, #FFFFFF);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
+        border-bottom: 3px solid rgba(255,215,0,0.3);
+        padding-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        animation: titleShimmer 4s ease-in-out infinite;
+    }
+    
+    @keyframes titleShimmer {
+        0%, 100% { filter: brightness(1); }
+        50% { filter: brightness(1.3); }
+    }
+    
+    /* Enhanced NASA panel with ocean theme */
+    .nasa-panel {
+        background: rgba(30, 58, 138, 0.3);
+        backdrop-filter: blur(25px);
+        border-radius: 25px;
+        padding: 2.5rem;
+        color: white;
+        margin: 2rem 0;
+        box-shadow: 0 20px 60px rgba(30, 58, 138, 0.4);
+        border: 2px solid rgba(59, 130, 246, 0.3);
+        position: relative;
+        overflow: hidden;
+        animation: nasaFloat 12s ease-in-out infinite;
+    }
+    
+    @keyframes nasaFloat {
+        0%, 100% { 
+            transform: translateY(0) rotate(0deg);
+        }
+        25% { 
+            transform: translateY(-10px) rotate(0.5deg);
+        }
+        50% { 
+            transform: translateY(-18px) rotate(0deg);
+        }
+        75% { 
+            transform: translateY(-8px) rotate(-0.5deg);
+        }
+    }
+    
+    /* Enhanced tabs with wave theme */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-bottom: 2px solid rgba(255,215,0,0.3);
+        padding: 0.5rem;
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background: linear-gradient(135deg, #FFD700 0%, #FFFFFF 30%, #FFF8DC 60%, #FFEB3B 100%);
+        color: #004080;
+        border-radius: 15px;
+        border: 2px solid rgba(255,215,0,0.4);
+        padding: 1rem 2rem;
+        font-weight: 700;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: tabFloat 5s ease-in-out infinite;
+    }
+    
+    @keyframes tabFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background: linear-gradient(135deg, #FFEB3B 0%, #FFFFFF 50%, #FFD700 100%);
+        color: #003D82;
+        transform: translateY(-8px) scale(1.05);
+        box-shadow: 0 15px 35px rgba(255, 215, 0, 0.4);
+        animation: tabWaveFloat 2s ease-in-out infinite;
+    }
+    
+    @keyframes tabWaveFloat {
+        0%, 100% { 
+            transform: translateY(-8px) scale(1.05);
+        }
+        50% { 
+            transform: translateY(-15px) scale(1.08);
+        }
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FFD700 50%, #FFEB3B 100%);
+        color: #003D82;
+        border-color: #FFD700;
+        transform: translateY(-10px);
+        box-shadow: 0 20px 45px rgba(255, 215, 0, 0.5);
+        animation: activeTabWave 3s ease-in-out infinite;
+    }
+    
+    @keyframes activeTabWave {
+        0%, 100% { 
+            transform: translateY(-10px) rotate(0deg);
+            box-shadow: 0 20px 45px rgba(255, 215, 0, 0.5);
+        }
+        50% { 
+            transform: translateY(-18px) rotate(0.5deg);
+            box-shadow: 0 25px 55px rgba(255, 215, 0, 0.7);
+        }
+    }
+    
+    /* Enhanced cesium container */
+    .cesium-container {
+        height: 650px;
+        border-radius: 25px;
+        overflow: hidden;
+        box-shadow: 0 25px 70px rgba(0,0,0,0.3);
+        border: 3px solid rgba(255,215,0,0.4);
+        background: rgba(0, 0, 0, 0.1);
+        margin: 2rem 0;
+        position: relative;
+        transition: all 0.4s ease;
+        animation: containerFloat 15s ease-in-out infinite;
+    }
+    
+    @keyframes containerFloat {
+        0%, 100% { 
+            transform: translateY(0) rotate(0deg);
+        }
+        33% { 
+            transform: translateY(-12px) rotate(0.3deg);
+        }
+        66% { 
+            transform: translateY(-20px) rotate(-0.3deg);
+        }
+    }
+    
+    .cesium-container:hover {
+        transform: translateY(-25px) scale(1.02);
+        box-shadow: 0 35px 90px rgba(255, 215, 0, 0.3);
+        border-color: #FFD700;
+    }
+    
+    /* Enhanced chat interface */
+    .chat-interface {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(25px);
+        border-radius: 25px;
+        padding: 2.5rem;
+        margin: 2.5rem 0;
+        border: 2px solid rgba(255,215,0,0.3);
+        color: white;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        position: relative;
+        overflow: hidden;
+        animation: chatFloat 9s ease-in-out infinite;
+    }
+    
+    @keyframes chatFloat {
+        0%, 100% { 
+            transform: translateY(0) rotate(0deg);
+        }
+        50% { 
+            transform: translateY(-12px) rotate(0.3deg);
+        }
     }
 </style>
 """, unsafe_allow_html=True)
-
 # Initialize the Groq client
 @st.cache_resource
 def init_groq_client():
@@ -417,6 +2301,7 @@ def get_db_connection():
 def create_enhanced_cesium_map():
     """Create Cesium map with all ARGO float locations from database"""
     # Get all float locations
+    
     float_locations = get_all_float_locations()
     
     # Prepare data for Cesium
@@ -571,21 +2456,7 @@ def create_enhanced_cesium_map():
     """
     return cesium_html
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# System prompt for LLM (from the original code)
+# System prompt for LLM (enhanced for advanced queries)
 system_prompt = """
 You are FloatChat, an AI assistant for querying an ARGO ocean database. Your purpose is to translate natural language queries into precise PostgreSQL queries.
 
@@ -598,6 +2469,9 @@ Database Schema for table 'argo_floats':
 - temperature (FLOAT): in °C
 - salinity (FLOAT): Practical Salinity Units (PSU)
 - region (TEXT): Pre-set region like 'Indian Ocean'
+- oxygen (FLOAT): Optional - dissolved oxygen (μmol/kg)
+- chlorophyll (FLOAT): Optional - chlorophyll concentration (mg/m³)
+- nitrate (FLOAT): Optional - nitrate concentration (μmol/kg)
 
 IMPORTANT LOCATIONS (latitude, longitude):
 - Chennai, India: (13.0825, 80.2707)
@@ -605,6 +2479,15 @@ IMPORTANT LOCATIONS (latitude, longitude):
 - Kochi, India: (9.9312, 76.2673)
 - Andaman Islands: (11.7401, 92.6586)
 - Lakshadweep Islands: (10.5667, 72.6417)
+- Bay of Bengal: (15.0, 90.0) with approximate bounds 5°N to 22°N and 80°E to 100°E
+- Arabian Sea: (15.0, 65.0) with approximate bounds 5°N to 25°N and 50°E to 70°E
+
+OCEANOGRAPHIC CONCEPTS:
+- Thermocline: Layer where temperature changes rapidly with depth
+- Halocline: Layer where salinity changes rapidly with depth
+- Mixed Layer Depth: Depth where temperature is 0.5°C different from surface
+- Upwelling: Cooler, nutrient-rich water rising to surface
+- Monsoon effects: Seasonal changes in Indian Ocean
 
 RULES:
 1. Your output MUST be structured as:
@@ -615,9 +2498,19 @@ RULES:
    - Include a LIMIT clause (default LIMIT 100 unless user specifies "all" or similar)
    - Use appropriate WHERE clauses for filtering
    - Select only necessary columns (use * only when specifically requested)
+   - For spatial queries, use bounding boxes with appropriate margins
+   - For temporal queries, use appropriate date ranges
+   - For depth-based queries, use pressure as a proxy for depth
+
+3. SPECIAL HANDLING FOR ADVANCED QUERIES:
+   - For thermocline/halocline: Calculate temperature/salinity gradients
+   - For water masses: Use T-S diagrams with specific boundaries
+   - For monsoon effects: Use seasonal date ranges (Jun-Sep for SW monsoon, Dec-Feb for NE monsoon)
+   - For upwelling: Look for anomalously cold surface waters in specific regions
 
 Now, generate the appropriate response and SQL query for the following request:
 """
+
 def get_all_float_locations():
     """Fetch all float locations from the database"""
     conn = get_db_connection()
@@ -649,6 +2542,7 @@ def get_all_float_locations():
         pool = init_db_pool()
         if pool and conn:
             pool.putconn(conn)
+
 def extract_sql(response):
     sql_match = re.search(r'<sql>(.*?)</sql>', response, re.DOTALL)
     if sql_match:
@@ -701,6 +2595,132 @@ def execute_sql_query(sql_query):
             pool.putconn(conn)
         return get_sample_argo_data().head(100)
 
+# Function to handle advanced oceanographic queries
+def process_advanced_query(user_query, df_columns):
+    """
+    Handle advanced oceanographic queries that require special processing
+    Returns modified SQL query or None if no special handling needed
+    """
+    user_query_lower = user_query.lower()
+    
+    # Thermocline detection
+    if any(term in user_query_lower for term in ['thermocline', 'temperature gradient', 'mixed layer']):
+        return """
+        WITH depth_bins AS (
+            SELECT 
+                platform_number,
+                cycle_number,
+                FLOOR(pressure/100) * 100 as depth_bin,
+                AVG(temperature) as avg_temp,
+                COUNT(*) as measurements
+            FROM argo_floats
+            WHERE pressure BETWEEN 0 AND 1000
+            GROUP BY platform_number, cycle_number, FLOOR(pressure/100) * 100
+            HAVING COUNT(*) > 5
+        ),
+        temp_gradients AS (
+            SELECT 
+                platform_number,
+                cycle_number,
+                depth_bin,
+                avg_temp,
+                LAG(avg_temp) OVER (PARTITION BY platform_number, cycle_number ORDER BY depth_bin) as prev_temp,
+                (avg_temp - LAG(avg_temp) OVER (PARTITION BY platform_number, cycle_number ORDER BY depth_bin)) / 100 as temp_gradient
+            FROM depth_bins
+        )
+        SELECT 
+            platform_number,
+            cycle_number,
+            depth_bin as pressure_level,
+            avg_temp,
+            temp_gradient
+        FROM temp_gradients
+        WHERE ABS(temp_gradient) > 0.05
+        ORDER BY platform_number, cycle_number, depth_bin
+        LIMIT 100
+        """
+    
+    # Water mass identification using T-S diagrams
+    if any(term in user_query_lower for term in ['water mass', 'ts diagram', 'temperature-salinity']):
+        return """
+        SELECT 
+            platform_number,
+            cycle_number,
+            temperature,
+            salinity,
+            pressure,
+            measurement_time,
+            latitude,
+            longitude
+        FROM argo_floats
+        WHERE temperature IS NOT NULL 
+          AND salinity IS NOT NULL
+          AND pressure BETWEEN 0 AND 2000
+        ORDER BY platform_number, cycle_number, pressure
+        LIMIT 200
+        """
+    
+    # Monsoon effects
+    if any(term in user_query_lower for term in ['monsoon', 'seasonal', 'upwelling']):
+        # Determine which monsoon season based on query
+        if 'southwest' in user_query_lower or 'sw monsoon' in user_query_lower:
+            month_condition = "EXTRACT(MONTH FROM measurement_time) BETWEEN 6 AND 9"
+        elif 'northeast' in user_query_lower or 'ne monsoon' in user_query_lower:
+            month_condition = "EXTRACT(MONTH FROM measurement_time) IN (12, 1, 2)"
+        else:
+            # General monsoon query
+            month_condition = "EXTRACT(MONTH FROM measurement_time) BETWEEN 6 AND 9 OR EXTRACT(MONTH FROM measurement_time) IN (12, 1, 2)"
+        
+        return f"""
+        SELECT 
+            platform_number,
+            cycle_number,
+            measurement_time,
+            latitude,
+            longitude,
+            temperature,
+            salinity,
+            pressure
+        FROM argo_floats
+        WHERE ({month_condition})
+          AND latitude BETWEEN 5 AND 25
+          AND longitude BETWEEN 50 AND 100
+        ORDER BY measurement_time DESC
+        LIMIT 100
+        """
+    
+    # Bio-geo-chemical parameters
+    if any(term in user_query_lower for term in ['oxygen', 'chlorophyll', 'nitrate', 'bgc', 'bio-geo-chemical']):
+        # Check which BGC parameters are available
+        available_columns = []
+        if 'oxygen' in df_columns and any(term in user_query_lower for term in ['oxygen', 'o2']):
+            available_columns.append('oxygen')
+        if 'chlorophyll' in df_columns and any(term in user_query_lower for term in ['chlorophyll', 'chl']):
+            available_columns.append('chlorophyll')
+        if 'nitrate' in df_columns and any(term in user_query_lower for term in ['nitrate', 'no3']):
+            available_columns.append('nitrate')
+        
+        if available_columns:
+            columns_str = ', '.join(available_columns)
+            return f"""
+            SELECT 
+                platform_number,
+                cycle_number,
+                measurement_time,
+                latitude,
+                longitude,
+                pressure,
+                temperature,
+                salinity,
+                {columns_str}
+            FROM argo_floats
+            WHERE {' IS NOT NULL OR '.join(available_columns)} IS NOT NULL
+            ORDER BY measurement_time DESC
+            LIMIT 100
+            """
+    
+    return None
+
 # Cached and rate-limited version of process_user_query
 @lru_cache(maxsize=100)
 @st.cache_data(ttl=300)  # Cache for 5 minutes
@@ -711,6 +2731,39 @@ def process_user_query_cached(user_query):
 
 def process_user_query(user_query):
     try:
+        # First check if this is an advanced query that needs special handling
+        conn = get_db_connection()
+        df_columns = []
+        if conn:
+            try:
+                # Get column names to check for BGC parameters
+                cursor = conn.cursor()
+                cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'argo_floats'")
+                df_columns = [row[0] for row in cursor.fetchall()]
+            except Exception as e:
+                logger.error(f"Error fetching column names: {e}")
+            finally:
+                # Return connection to pool
+                pool = init_db_pool()
+                if pool and conn:
+                    pool.putconn(conn)
+        
+        # Check for advanced queries
+        advanced_sql = process_advanced_query(user_query, df_columns)
+        
+        if advanced_sql:
+            # Use the advanced SQL directly
+            with st.spinner("Executing advanced oceanographic query..."):
+                df = execute_sql_query(advanced_sql)
+            
+            if df is None or df.empty:
+                st.warning("No data found for your advanced query.")
+                return None, None, None
+            
+            natural_response = f"Results for your query about '{user_query}':"
+            return natural_response, df, advanced_sql
+        
+        # For regular queries, use the LLM
         groq_client = init_groq_client()
         messages = [
             {"role": "system", "content": system_prompt},
@@ -740,7 +2793,7 @@ def process_user_query(user_query):
             return None, None, None
         
         response_match = re.search(r'<response>(.*?)</response>', llm_response, re.DOTALL)
-        natural_response = response_match.group(1).strip() if response_match else "Here are the results:"
+        natural_response = response_match.group[1].strip() if response_match else f"Results for your query: {user_query}"
         
         return natural_response, df, sql_query
         
@@ -908,6 +2961,61 @@ def create_geographic_heatmap(df):
     
     return fig
 
+# Add specialized visualization functions
+def create_ts_diagram(df):
+    """Create Temperature-Salinity diagram for water mass analysis"""
+    if 'temperature' not in df.columns or 'salinity' not in df.columns:
+        return None
+    
+    fig = px.scatter(
+        df, x='salinity', y='temperature',
+        color='pressure' if 'pressure' in df.columns else None,
+        title="Temperature-Salinity Diagram",
+        labels={'salinity': 'Salinity (PSU)', 'temperature': 'Temperature (°C)'},
+        color_continuous_scale='viridis'
+    )
+    
+    fig.update_layout(
+        paper_bgcolor='#2d2d2d',
+        plot_bgcolor='#2d2d2d',
+        font=dict(color='white'),
+        height=500
+    )
+    
+    return fig
+
+def create_vertical_profile(df, parameter='temperature'):
+    """Create vertical profile of a parameter"""
+    if parameter not in df.columns or 'pressure' not in df.columns:
+        return None
+    
+    fig = go.Figure()
+    
+    # Group by platform for different profiles
+    for platform in df['platform_number'].unique()[:10]:  # Show top 10 platforms
+        platform_data = df[df['platform_number'] == platform]
+        fig.add_trace(go.Scatter(
+            x=platform_data[parameter],
+            y=platform_data['pressure'],
+            mode='lines+markers',
+            name=f'Float {platform}',
+            line=dict(width=2),
+            marker=dict(size=4)
+        ))
+    
+    fig.update_layout(
+        title=f"Vertical Profile of {parameter.capitalize()}",
+        xaxis_title=parameter.capitalize(),
+        yaxis_title="Pressure (dbar)",
+        yaxis=dict(autorange='reversed'),  # Depth increases downward
+        paper_bgcolor='#2d2d2d',
+        plot_bgcolor='#2d2d2d',
+        font=dict(color='white'),
+        height=500
+    )
+    
+    return fig
+
 # Tooltip component for better UX
 def tooltip(text, help_text):
     st.markdown(f"""
@@ -916,6 +3024,16 @@ def tooltip(text, help_text):
         <span class="tooltiptext">{help_text}</span>
     </div>
     """, unsafe_allow_html=True)
+
+# Function to display dataframe with pagination
+def display_dataframe_with_pagination(df):
+    gb = GridOptionsBuilder.from_dataframe(df)
+    gb.configure_pagination(paginationAutoPageSize=True)
+    gb.configure_side_bar()
+    gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children")
+    gridOptions = gb.build()
+    
+    AgGrid(df, gridOptions=gridOptions, enable_enterprise_modules=True, height=400)
 
 # Main function with all enhancements
 def main():
@@ -1025,7 +3143,10 @@ def main():
         "Show floats near Arabian Sea",
         "Temperature above 28°C", 
         "Salinity profiles in Indian Ocean",
-        "Recent measurements from last week"
+        "Recent measurements from last week",
+        "Find thermocline depth in Bay of Bengal",
+        "Compare water masses in different ocean regions",
+        "Show monsoon effects on surface temperature"
     ]
     
     query_cols = st.columns(len(sample_queries))
@@ -1172,12 +3293,26 @@ def main():
                 
                 # Create analysis visualizations
                 if len(df) > 0:
-                    # Temperature-Depth Profile
-                    if 'temperature' in df.columns and 'pressure' in df.columns:
-                        st.subheader("Temperature-Depth Profiles")
-                        profile_fig = create_temperature_depth_profile(df)
-                        if profile_fig:
-                            st.plotly_chart(profile_fig, use_container_width=True)
+                    # Temperature-Salinity diagram
+                    if 'temperature' in df.columns and 'salinity' in df.columns:
+                        st.subheader("Water Mass Analysis (T-S Diagram)")
+                        ts_fig = create_ts_diagram(df)
+                        if ts_fig:
+                            st.plotly_chart(ts_fig, use_container_width=True)
+                    
+                    # Vertical profiles for different parameters
+                    profile_params = st.multiselect(
+                        "Select parameters for vertical profiles:",
+                        ['temperature', 'salinity', 'oxygen', 'chlorophyll', 'nitrate'],
+                        default=['temperature', 'salinity']
+                    )
+                    
+                    for param in profile_params:
+                        if param in df.columns:
+                            st.subheader(f"Vertical Profile of {param.capitalize()}")
+                            profile_fig = create_vertical_profile(df, param)
+                            if profile_fig:
+                                st.plotly_chart(profile_fig, use_container_width=True)
                     
                     # Statistical summary
                     st.subheader("Statistical Summary")
@@ -1383,17 +3518,10 @@ def main():
             - "Temperature above 28°C"
             - "Salinity profiles from last month"
             - "Deepest measurements in Indian Ocean"
+            - "Find thermocline depth in Bay of Bengal"
+            - "Compare water masses in different regions"
+            - "Show monsoon effects on surface temperature"
             """)
-
-# Function to display dataframe with pagination
-def display_dataframe_with_pagination(df):
-    gb = GridOptionsBuilder.from_dataframe(df)
-    gb.configure_pagination(paginationAutoPageSize=True)
-    gb.configure_side_bar()
-    gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children")
-    gridOptions = gb.build()
-    
-    AgGrid(df, gridOptions=gridOptions, enable_enterprise_modules=True, height=400)
 
 if __name__ == "__main__":
     main()
