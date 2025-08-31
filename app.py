@@ -2226,6 +2226,7 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
 # Initialize the Groq client
 @st.cache_resource
 def init_groq_client():
@@ -2301,7 +2302,6 @@ def get_db_connection():
 def create_enhanced_cesium_map():
     """Create Cesium map with all ARGO float locations from database"""
     # Get all float locations
-    
     float_locations = get_all_float_locations()
     
     # Prepare data for Cesium
@@ -2456,7 +2456,21 @@ def create_enhanced_cesium_map():
     """
     return cesium_html
 
-# System prompt for LLM (enhanced for advanced queries)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# System prompt for LLM (from the original code)
 system_prompt = """
 You are FloatChat, an AI assistant for querying an ARGO ocean database. Your purpose is to translate natural language queries into precise PostgreSQL queries.
 
@@ -2469,9 +2483,6 @@ Database Schema for table 'argo_floats':
 - temperature (FLOAT): in °C
 - salinity (FLOAT): Practical Salinity Units (PSU)
 - region (TEXT): Pre-set region like 'Indian Ocean'
-- oxygen (FLOAT): Optional - dissolved oxygen (μmol/kg)
-- chlorophyll (FLOAT): Optional - chlorophyll concentration (mg/m³)
-- nitrate (FLOAT): Optional - nitrate concentration (μmol/kg)
 
 IMPORTANT LOCATIONS (latitude, longitude):
 - Chennai, India: (13.0825, 80.2707)
@@ -2479,15 +2490,6 @@ IMPORTANT LOCATIONS (latitude, longitude):
 - Kochi, India: (9.9312, 76.2673)
 - Andaman Islands: (11.7401, 92.6586)
 - Lakshadweep Islands: (10.5667, 72.6417)
-- Bay of Bengal: (15.0, 90.0) with approximate bounds 5°N to 22°N and 80°E to 100°E
-- Arabian Sea: (15.0, 65.0) with approximate bounds 5°N to 25°N and 50°E to 70°E
-
-OCEANOGRAPHIC CONCEPTS:
-- Thermocline: Layer where temperature changes rapidly with depth
-- Halocline: Layer where salinity changes rapidly with depth
-- Mixed Layer Depth: Depth where temperature is 0.5°C different from surface
-- Upwelling: Cooler, nutrient-rich water rising to surface
-- Monsoon effects: Seasonal changes in Indian Ocean
 
 RULES:
 1. Your output MUST be structured as:
@@ -2498,19 +2500,9 @@ RULES:
    - Include a LIMIT clause (default LIMIT 100 unless user specifies "all" or similar)
    - Use appropriate WHERE clauses for filtering
    - Select only necessary columns (use * only when specifically requested)
-   - For spatial queries, use bounding boxes with appropriate margins
-   - For temporal queries, use appropriate date ranges
-   - For depth-based queries, use pressure as a proxy for depth
-
-3. SPECIAL HANDLING FOR ADVANCED QUERIES:
-   - For thermocline/halocline: Calculate temperature/salinity gradients
-   - For water masses: Use T-S diagrams with specific boundaries
-   - For monsoon effects: Use seasonal date ranges (Jun-Sep for SW monsoon, Dec-Feb for NE monsoon)
-   - For upwelling: Look for anomalously cold surface waters in specific regions
 
 Now, generate the appropriate response and SQL query for the following request:
 """
-
 def get_all_float_locations():
     """Fetch all float locations from the database"""
     conn = get_db_connection()
@@ -2542,7 +2534,6 @@ def get_all_float_locations():
         pool = init_db_pool()
         if pool and conn:
             pool.putconn(conn)
-
 def extract_sql(response):
     sql_match = re.search(r'<sql>(.*?)</sql>', response, re.DOTALL)
     if sql_match:
@@ -2595,132 +2586,6 @@ def execute_sql_query(sql_query):
             pool.putconn(conn)
         return get_sample_argo_data().head(100)
 
-# Function to handle advanced oceanographic queries
-def process_advanced_query(user_query, df_columns):
-    """
-    Handle advanced oceanographic queries that require special processing
-    Returns modified SQL query or None if no special handling needed
-    """
-    user_query_lower = user_query.lower()
-    
-    # Thermocline detection
-    if any(term in user_query_lower for term in ['thermocline', 'temperature gradient', 'mixed layer']):
-        return """
-        WITH depth_bins AS (
-            SELECT 
-                platform_number,
-                cycle_number,
-                FLOOR(pressure/100) * 100 as depth_bin,
-                AVG(temperature) as avg_temp,
-                COUNT(*) as measurements
-            FROM argo_floats
-            WHERE pressure BETWEEN 0 AND 1000
-            GROUP BY platform_number, cycle_number, FLOOR(pressure/100) * 100
-            HAVING COUNT(*) > 5
-        ),
-        temp_gradients AS (
-            SELECT 
-                platform_number,
-                cycle_number,
-                depth_bin,
-                avg_temp,
-                LAG(avg_temp) OVER (PARTITION BY platform_number, cycle_number ORDER BY depth_bin) as prev_temp,
-                (avg_temp - LAG(avg_temp) OVER (PARTITION BY platform_number, cycle_number ORDER BY depth_bin)) / 100 as temp_gradient
-            FROM depth_bins
-        )
-        SELECT 
-            platform_number,
-            cycle_number,
-            depth_bin as pressure_level,
-            avg_temp,
-            temp_gradient
-        FROM temp_gradients
-        WHERE ABS(temp_gradient) > 0.05
-        ORDER BY platform_number, cycle_number, depth_bin
-        LIMIT 100
-        """
-    
-    # Water mass identification using T-S diagrams
-    if any(term in user_query_lower for term in ['water mass', 'ts diagram', 'temperature-salinity']):
-        return """
-        SELECT 
-            platform_number,
-            cycle_number,
-            temperature,
-            salinity,
-            pressure,
-            measurement_time,
-            latitude,
-            longitude
-        FROM argo_floats
-        WHERE temperature IS NOT NULL 
-          AND salinity IS NOT NULL
-          AND pressure BETWEEN 0 AND 2000
-        ORDER BY platform_number, cycle_number, pressure
-        LIMIT 200
-        """
-    
-    # Monsoon effects
-    if any(term in user_query_lower for term in ['monsoon', 'seasonal', 'upwelling']):
-        # Determine which monsoon season based on query
-        if 'southwest' in user_query_lower or 'sw monsoon' in user_query_lower:
-            month_condition = "EXTRACT(MONTH FROM measurement_time) BETWEEN 6 AND 9"
-        elif 'northeast' in user_query_lower or 'ne monsoon' in user_query_lower:
-            month_condition = "EXTRACT(MONTH FROM measurement_time) IN (12, 1, 2)"
-        else:
-            # General monsoon query
-            month_condition = "EXTRACT(MONTH FROM measurement_time) BETWEEN 6 AND 9 OR EXTRACT(MONTH FROM measurement_time) IN (12, 1, 2)"
-        
-        return f"""
-        SELECT 
-            platform_number,
-            cycle_number,
-            measurement_time,
-            latitude,
-            longitude,
-            temperature,
-            salinity,
-            pressure
-        FROM argo_floats
-        WHERE ({month_condition})
-          AND latitude BETWEEN 5 AND 25
-          AND longitude BETWEEN 50 AND 100
-        ORDER BY measurement_time DESC
-        LIMIT 100
-        """
-    
-    # Bio-geo-chemical parameters
-    if any(term in user_query_lower for term in ['oxygen', 'chlorophyll', 'nitrate', 'bgc', 'bio-geo-chemical']):
-        # Check which BGC parameters are available
-        available_columns = []
-        if 'oxygen' in df_columns and any(term in user_query_lower for term in ['oxygen', 'o2']):
-            available_columns.append('oxygen')
-        if 'chlorophyll' in df_columns and any(term in user_query_lower for term in ['chlorophyll', 'chl']):
-            available_columns.append('chlorophyll')
-        if 'nitrate' in df_columns and any(term in user_query_lower for term in ['nitrate', 'no3']):
-            available_columns.append('nitrate')
-        
-        if available_columns:
-            columns_str = ', '.join(available_columns)
-            return f"""
-            SELECT 
-                platform_number,
-                cycle_number,
-                measurement_time,
-                latitude,
-                longitude,
-                pressure,
-                temperature,
-                salinity,
-                {columns_str}
-            FROM argo_floats
-            WHERE {' IS NOT NULL OR '.join(available_columns)} IS NOT NULL
-            ORDER BY measurement_time DESC
-            LIMIT 100
-            """
-    
-    return None
-
 # Cached and rate-limited version of process_user_query
 @lru_cache(maxsize=100)
 @st.cache_data(ttl=300)  # Cache for 5 minutes
@@ -2731,39 +2596,6 @@ def process_user_query_cached(user_query):
 
 def process_user_query(user_query):
     try:
-        # First check if this is an advanced query that needs special handling
-        conn = get_db_connection()
-        df_columns = []
-        if conn:
-            try:
-                # Get column names to check for BGC parameters
-                cursor = conn.cursor()
-                cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'argo_floats'")
-                df_columns = [row[0] for row in cursor.fetchall()]
-            except Exception as e:
-                logger.error(f"Error fetching column names: {e}")
-            finally:
-                # Return connection to pool
-                pool = init_db_pool()
-                if pool and conn:
-                    pool.putconn(conn)
-        
-        # Check for advanced queries
-        advanced_sql = process_advanced_query(user_query, df_columns)
-        
-        if advanced_sql:
-            # Use the advanced SQL directly
-            with st.spinner("Executing advanced oceanographic query..."):
-                df = execute_sql_query(advanced_sql)
-            
-            if df is None or df.empty:
-                st.warning("No data found for your advanced query.")
-                return None, None, None
-            
-            natural_response = f"Results for your query about '{user_query}':"
-            return natural_response, df, advanced_sql
-        
-        # For regular queries, use the LLM
         groq_client = init_groq_client()
         messages = [
             {"role": "system", "content": system_prompt},
@@ -2793,7 +2625,7 @@ def process_user_query(user_query):
             return None, None, None
         
         response_match = re.search(r'<response>(.*?)</response>', llm_response, re.DOTALL)
-        natural_response = response_match.group[1].strip() if response_match else f"Results for your query: {user_query}"
+        natural_response = response_match.group(1).strip() if response_match else "Here are the results:"
         
         return natural_response, df, sql_query
         
@@ -2961,61 +2793,6 @@ def create_geographic_heatmap(df):
     
     return fig
 
-# Add specialized visualization functions
-def create_ts_diagram(df):
-    """Create Temperature-Salinity diagram for water mass analysis"""
-    if 'temperature' not in df.columns or 'salinity' not in df.columns:
-        return None
-    
-    fig = px.scatter(
-        df, x='salinity', y='temperature',
-        color='pressure' if 'pressure' in df.columns else None,
-        title="Temperature-Salinity Diagram",
-        labels={'salinity': 'Salinity (PSU)', 'temperature': 'Temperature (°C)'},
-        color_continuous_scale='viridis'
-    )
-    
-    fig.update_layout(
-        paper_bgcolor='#2d2d2d',
-        plot_bgcolor='#2d2d2d',
-        font=dict(color='white'),
-        height=500
-    )
-    
-    return fig
-
-def create_vertical_profile(df, parameter='temperature'):
-    """Create vertical profile of a parameter"""
-    if parameter not in df.columns or 'pressure' not in df.columns:
-        return None
-    
-    fig = go.Figure()
-    
-    # Group by platform for different profiles
-    for platform in df['platform_number'].unique()[:10]:  # Show top 10 platforms
-        platform_data = df[df['platform_number'] == platform]
-        fig.add_trace(go.Scatter(
-            x=platform_data[parameter],
-            y=platform_data['pressure'],
-            mode='lines+markers',
-            name=f'Float {platform}',
-            line=dict(width=2),
-            marker=dict(size=4)
-        ))
-    
-    fig.update_layout(
-        title=f"Vertical Profile of {parameter.capitalize()}",
-        xaxis_title=parameter.capitalize(),
-        yaxis_title="Pressure (dbar)",
-        yaxis=dict(autorange='reversed'),  # Depth increases downward
-        paper_bgcolor='#2d2d2d',
-        plot_bgcolor='#2d2d2d',
-        font=dict(color='white'),
-        height=500
-    )
-    
-    return fig
-
 # Tooltip component for better UX
 def tooltip(text, help_text):
     st.markdown(f"""
@@ -3024,16 +2801,6 @@ def tooltip(text, help_text):
         <span class="tooltiptext">{help_text}</span>
     </div>
     """, unsafe_allow_html=True)
-
-# Function to display dataframe with pagination
-def display_dataframe_with_pagination(df):
-    gb = GridOptionsBuilder.from_dataframe(df)
-    gb.configure_pagination(paginationAutoPageSize=True)
-    gb.configure_side_bar()
-    gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children")
-    gridOptions = gb.build()
-    
-    AgGrid(df, gridOptions=gridOptions, enable_enterprise_modules=True, height=400)
 
 # Main function with all enhancements
 def main():
@@ -3127,26 +2894,22 @@ def main():
     col1, col2 = st.columns([4, 1])
     with col1:
         user_query = st.text_input(
-            "Ask about ARGO floats, oceanographic data, or specific analyses:",
+            "",
             placeholder="e.g., Show temperature profiles near Chennai",
-            key="main_query"
+            key="main_query",
+            label_visibility="hidden"
         )
     
     with col2:
-        execute_query = st.button("🔍 Execute", key="execute_main", help="Execute your query")
-        tooltip("💡", "Ask natural language questions about ARGO float data")
-    
+        execute_query = st.button("\n🔍 Execute", key="execute_main", help="Execute your query")
+            
     # Sample queries (matching original design)
     st.markdown("**Sample Queries:**")
     
     sample_queries = [
-        "Show floats near Arabian Sea",
-        "Temperature above 28°C", 
-        "Salinity profiles in Indian Ocean",
-        "Recent measurements from last week",
-        "Find thermocline depth in Bay of Bengal",
-        "Compare water masses in different ocean regions",
-        "Show monsoon effects on surface temperature"
+        "show me a float having highest temperature",
+        "show me the float which have temperature below 30 degree", 
+        "show me float near to srilanka india"
     ]
     
     query_cols = st.columns(len(sample_queries))
@@ -3293,26 +3056,12 @@ def main():
                 
                 # Create analysis visualizations
                 if len(df) > 0:
-                    # Temperature-Salinity diagram
-                    if 'temperature' in df.columns and 'salinity' in df.columns:
-                        st.subheader("Water Mass Analysis (T-S Diagram)")
-                        ts_fig = create_ts_diagram(df)
-                        if ts_fig:
-                            st.plotly_chart(ts_fig, use_container_width=True)
-                    
-                    # Vertical profiles for different parameters
-                    profile_params = st.multiselect(
-                        "Select parameters for vertical profiles:",
-                        ['temperature', 'salinity', 'oxygen', 'chlorophyll', 'nitrate'],
-                        default=['temperature', 'salinity']
-                    )
-                    
-                    for param in profile_params:
-                        if param in df.columns:
-                            st.subheader(f"Vertical Profile of {param.capitalize()}")
-                            profile_fig = create_vertical_profile(df, param)
-                            if profile_fig:
-                                st.plotly_chart(profile_fig, use_container_width=True)
+                    # Temperature-Depth Profile
+                    if 'temperature' in df.columns and 'pressure' in df.columns:
+                        st.subheader("Temperature-Depth Profiles")
+                        profile_fig = create_temperature_depth_profile(df)
+                        if profile_fig:
+                            st.plotly_chart(profile_fig, use_container_width=True)
                     
                     # Statistical summary
                     st.subheader("Statistical Summary")
@@ -3499,6 +3248,7 @@ def main():
         
         st.markdown(f"**Database:** {db_status}")
         st.markdown("**AI Model:** 🟢 Online")
+        st.markdown("**NASA API:** 🟢 Available")
         st.markdown("**Cesium Maps:** 🟢 Active")
         
         # Help section
@@ -3513,11 +3263,21 @@ def main():
         
         with st.expander("Sample query examples"):
             st.write("""
-            - "Show floats near Chennai"
+            - "show me floats temperature below 30 degree"
             - "Temperature above 28°C"
-            - "Show the longest flot form chennai"
+            - "show me salinity profiles above  32"
+            - "Deepest measurements in Indian Ocean"
             """)
+
+# Function to display dataframe with pagination
+def display_dataframe_with_pagination(df):
+    gb = GridOptionsBuilder.from_dataframe(df)
+    gb.configure_pagination(paginationAutoPageSize=True)
+    gb.configure_side_bar()
+    gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children")
+    gridOptions = gb.build()
+    
+    AgGrid(df, gridOptions=gridOptions, enable_enterprise_modules=True, height=400)
 
 if __name__ == "__main__":
     main()
-
