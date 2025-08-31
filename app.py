@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import folium
 from streamlit_folium import folium_static
+from groq import Groq
 import re
 from datetime import datetime, timedelta
 import plotly.express as px
@@ -19,16 +20,6 @@ from functools import lru_cache
 import time
 import html
 from st_aggrid import AgGrid, GridOptionsBuilder
-import seaborn as sns
-from geopy.distance import geodesic
-from scipy import interpolate, stats
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-import warnings
-from dataclasses import dataclass
-from typing import Dict, Any, Optional
-
-warnings.filterwarnings('ignore')
 
 # Set page configuration
 st.set_page_config(
@@ -2235,622 +2226,24 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
-# Database configuration
-# Database configuration with multiple options
-DB_CONFIGS = [
-    # Primary pooled connection
-    {
-        "host": "ep-still-field-a17hi4xm-pooler.ap-southeast-1.aws.neon.tech",
-        "database": "neondb",
-        "user": "neondb_owner",
-        "password": "npg_qV9a3dQRAeBm",
-        "port": "5432",
-        "sslmode": "require"
-    },
-    # Alternative direct connection
-    {
-        "host": "ep-still-field-a17hi4xm.ap-southeast-1.aws.neon.tech",  # Direct endpoint
-        "database": "neondb",
-        "user": "neondb_owner",
-        "password": "npg_qV9a3dQRAeBm",
-        "port": "5432",
-        "sslmode": "require"
-    }
-]
-
-# Use the first config as default
-DB_CONFIG = DB_CONFIGS[0]
-
-# Reference coordinates for major locations
-REFERENCE_LOCATIONS = {
-    "Chennai": (13.0827, 80.2707),
-    "Mumbai": (19.0760, 72.8777),
-    "Kochi": (9.9312, 76.2673),
-    "Kolkata": (22.5726, 88.3639),
-    "Visakhapatnam": (17.6868, 83.2185),
-    "Bengaluru": (12.9716, 77.5946),
-    "Arabian Sea": (15.0, 65.0),
-    "Bay of Bengal": (15.0, 87.0),
-    "Indian Ocean": (-20.0, 80.0),
-    "Equator": (0.0, 80.0),
-    "Maldives": (3.2028, 73.2207),
-    "Sri Lanka": (7.8731, 80.7718)
-}
-
-@dataclass
-class OceanographicAnalysis:
-    """Class to hold oceanographic analysis results"""
-    mixed_layer_depth: Optional[float] = None
-    thermocline_depth: Optional[float] = None
-    halocline_depth: Optional[float] = None
-    temperature_gradient: Optional[float] = None
-    salinity_gradient: Optional[float] = None
-    water_mass_classification: Optional[str] = None
-
-class ArgoAIIntelligence:
-    def __init__(self):
-        self.db_connection = None
-        
-        # Enhanced schema with oceanographic context
-        self.schema_info = """
-        ARGO Floats Database Schema:
-        
-        Table: argo_floats
-        Core Columns:
-        - platform_number (integer): Unique ARGO float identifier
-        - cycle_number (integer): Profile cycle number
-        - measurement_time (timestamp): UTC measurement time
-        - latitude (float): Decimal degrees (-90 to 90)
-        - longitude (float): Decimal degrees (-180 to 180)
-        - pressure (float): Water pressure in decibars (dbar)
-        - temperature (float): In-situ temperature in Celsius
-        - salinity (float): Practical Salinity Units (PSU)
-        - data_quality (text): Quality control flag
-        
-        Oceanographic Context:
-        - Indian Ocean coverage with 85 active floats
-        - Depth profiles from surface to ~2000m
-        - Temperature range: ~15-35°C
-        - Salinity range: ~33-37 PSU
-        - Mixed layer depth typically 20-100m
-        - Thermocline at 100-500m depth
-        """
-
-    def connect_db(self) -> bool:
-        """Establish database connection"""
-        try:
-            if self.db_connection is None or self.db_connection.closed:
-                self.db_connection = psycopg2.connect(**DB_CONFIG)
-            return True
-        except Exception as e:
-            st.error(f"Database connection failed: {str(e)}")
-            return False
-
-    def execute_query(self, query: str) -> pd.DataFrame:
-        """Execute SQL query and return DataFrame"""
-        try:
-            if self.connect_db():
-                df = pd.read_sql_query(query, self.db_connection)
-                return df
-        except Exception as e:
-            st.error(f"Query execution failed: {str(e)}")
-            return pd.DataFrame()
-
-    def advanced_nlp_to_sql(self, user_query: str, api_key: str = None) -> Dict[str, Any]:
-        """Advanced natural language to SQL with pattern matching"""
-        
-        # Enhanced pattern matching with oceanographic domain knowledge
-        patterns = {
-            # Location-based queries
-            r"(?:nearest|closest|near)\s+(?:to\s+)?(.+)": self._handle_location_query,
-            r"floats?\s+(?:in|around|near)\s+(.+)": self._handle_area_query,
-            
-            # Oceanographic analysis
-            r"(?:t-s|temperature.salinity)\s+diagram": self._handle_ts_diagram,
-            r"(?:mixed\s+layer|mld)\s+depth": self._handle_mixed_layer_depth,
-            r"(?:depth\s+profile|vertical\s+profile)": self._handle_depth_profile,
-            r"(?:thermocline|halocline)": self._handle_cline_analysis,
-            r"water\s+mass": self._handle_water_mass,
-            
-            # Temporal queries
-            r"(?:seasonal|monthly)\s+(?:trend|cycle|variation)": self._handle_seasonal_analysis,
-            r"(?:recent|latest|last\s+\d+)\s+(?:days?|weeks?|months?)": self._handle_recent_data,
-            r"(?:compare|comparison)\s+.*(?:between|vs)": self._handle_comparison,
-            
-            # Parameter-based queries
-            r"temperature\s+(?:above|greater than|>)\s+([\d.]+)": self._handle_temp_threshold,
-            r"temperature\s+(?:below|less than|<)\s+([\d.]+)": self._handle_temp_threshold,
-            r"salinity\s+(?:above|greater than|>)\s+([\d.]+)": self._handle_sal_threshold,
-            r"salinity\s+(?:below|less than|<)\s+([\d.]+)": self._handle_sal_threshold,
-            
-            # Statistical queries
-            r"(?:statistics|stats|summary)": self._handle_statistics,
-            r"(?:correlation|relationship)\s+between": self._handle_correlation,
-            
-            # Default patterns
-            r"(?:show|display|get|find)\s+all\s+floats?": lambda x: self._get_all_floats_query(),
-            r"(?:count|how many)\s+floats?": lambda x: "SELECT COUNT(DISTINCT platform_number) as total_floats FROM argo_floats;",
-        }
-        
-        query_lower = user_query.lower().strip()
-        sql_query = None
-        analysis_type = "general"
-        
-        # Try pattern matching
-        for pattern, handler in patterns.items():
-            match = re.search(pattern, query_lower)
-            if match:
-                if callable(handler):
-                    result = handler(match.groups()[0] if match.groups() else None)
-                    if isinstance(result, dict):
-                        sql_query = result.get('sql', '')
-                        analysis_type = result.get('type', 'general')
-                    else:
-                        sql_query = result
-                        analysis_type = pattern.split(r"\s+")[0] if r"\s+" in pattern else "general"
-                break
-        
-        # Fallback for API-based generation
-        if not sql_query and api_key:
-            sql_query = self._generate_with_openai(user_query, api_key)
-        
-        # Final fallback
-        if not sql_query:
-            sql_query = "SELECT * FROM argo_floats ORDER BY measurement_time DESC LIMIT 20;"
-            analysis_type = "general"
-        
-        return {
-            "sql": sql_query,
-            "analysis_type": analysis_type,
-            "query_interpretation": self._interpret_query(user_query, analysis_type)
-        }
-
-    def _handle_location_query(self, location: str) -> Dict[str, Any]:
-        """Handle location-based queries with distance calculation"""
-        location_clean = location.strip().title()
-        
-        if location_clean in REFERENCE_LOCATIONS:
-            lat, lon = REFERENCE_LOCATIONS[location_clean]
-            sql = f"""
-            SELECT 
-                platform_number, 
-                latitude, 
-                longitude, 
-                temperature, 
-                salinity,
-                pressure,
-                measurement_time,
-                SQRT(POW(latitude - {lat}, 2) + POW(longitude - {lon}, 2)) * 111 as distance_km
-            FROM argo_floats 
-            ORDER BY distance_km ASC 
-            LIMIT 20;
-            """
-            return {"sql": sql, "type": "location_analysis"}
-        
-        return {"sql": "SELECT * FROM argo_floats LIMIT 20;", "type": "general"}
-
-    def _handle_area_query(self, location: str) -> Dict[str, Any]:
-        """Handle area-based queries"""
-        return self._handle_location_query(location)
-
-    def _handle_ts_diagram(self, _) -> Dict[str, Any]:
-        """Handle T-S diagram requests"""
-        sql = """
-        SELECT 
-            platform_number,
-            temperature,
-            salinity,
-            pressure,
-            latitude,
-            longitude,
-            measurement_time
-        FROM argo_floats 
-        WHERE temperature IS NOT NULL 
-        AND salinity IS NOT NULL
-        ORDER BY platform_number, pressure;
-        """
-        return {"sql": sql, "type": "ts_diagram"}
-
-    def _handle_mixed_layer_depth(self, _) -> Dict[str, Any]:
-        """Handle mixed layer depth analysis"""
-        sql = """
-        WITH depth_profiles AS (
-            SELECT 
-                platform_number,
-                cycle_number,
-                pressure as depth,
-                temperature,
-                salinity,
-                ROW_NUMBER() OVER (PARTITION BY platform_number, cycle_number ORDER BY pressure) as depth_rank
-            FROM argo_floats
-            WHERE pressure <= 200  -- Focus on upper ocean
-            AND temperature IS NOT NULL
-        )
-        SELECT * FROM depth_profiles
-        ORDER BY platform_number, cycle_number, depth;
-        """
-        return {"sql": sql, "type": "mixed_layer_depth"}
-
-    def _handle_depth_profile(self, _) -> Dict[str, Any]:
-        """Handle depth profile visualization"""
-        sql = """
-        SELECT 
-            platform_number,
-            cycle_number,
-            pressure as depth,
-            temperature,
-            salinity,
-            measurement_time,
-            latitude,
-            longitude
-        FROM argo_floats
-        ORDER BY platform_number, cycle_number, pressure;
-        """
-        return {"sql": sql, "type": "depth_profile"}
-
-    def _handle_cline_analysis(self, _) -> Dict[str, Any]:
-        """Handle thermocline/halocline analysis"""
-        return self._handle_depth_profile(_)
-
-    def _handle_water_mass(self, _) -> Dict[str, Any]:
-        """Handle water mass identification"""
-        return self._handle_ts_diagram(_)
-
-    def _handle_seasonal_analysis(self, _) -> Dict[str, Any]:
-        """Handle seasonal trend analysis"""
-        sql = """
-        SELECT 
-            EXTRACT(MONTH FROM measurement_time) as month,
-            EXTRACT(YEAR FROM measurement_time) as year,
-            platform_number,
-            AVG(temperature) as avg_temperature,
-            AVG(salinity) as avg_salinity,
-            COUNT(*) as measurements,
-            AVG(latitude) as avg_lat,
-            AVG(longitude) as avg_lon
-        FROM argo_floats
-        GROUP BY year, month, platform_number
-        ORDER BY year, month, platform_number;
-        """
-        return {"sql": sql, "type": "seasonal_analysis"}
-
-    def _handle_recent_data(self, _) -> Dict[str, Any]:
-        """Handle recent data queries"""
-        sql = """
-        SELECT * FROM argo_floats 
-        WHERE measurement_time >= CURRENT_DATE - INTERVAL '30 days'
-        ORDER BY measurement_time DESC
-        LIMIT 50;
-        """
-        return {"sql": sql, "type": "recent_data"}
-
-    def _handle_comparison(self, _) -> Dict[str, Any]:
-        """Handle comparison queries"""
-        return self._handle_seasonal_analysis(_)
-
-    def _handle_temp_threshold(self, temp: str) -> Dict[str, Any]:
-        """Handle temperature threshold queries"""
-        try:
-            temp_val = float(temp)
-            sql = f"SELECT * FROM argo_floats WHERE temperature > {temp_val} ORDER BY temperature DESC LIMIT 50;"
-            return {"sql": sql, "type": "temperature_analysis"}
-        except:
-            return {"sql": "SELECT * FROM argo_floats WHERE temperature > 25 ORDER BY temperature DESC LIMIT 50;", "type": "temperature_analysis"}
-
-    def _handle_sal_threshold(self, sal: str) -> Dict[str, Any]:
-        """Handle salinity threshold queries"""
-        try:
-            sal_val = float(sal)
-            sql = f"SELECT * FROM argo_floats WHERE salinity > {sal_val} ORDER BY salinity DESC LIMIT 50;"
-            return {"sql": sql, "type": "salinity_analysis"}
-        except:
-            return {"sql": "SELECT * FROM argo_floats WHERE salinity > 35 ORDER BY salinity DESC LIMIT 50;", "type": "salinity_analysis"}
-
-    def _handle_statistics(self, _) -> Dict[str, Any]:
-        """Handle statistical summary requests"""
-        sql = """
-        SELECT 
-            COUNT(DISTINCT platform_number) as unique_floats,
-            COUNT(*) as total_measurements,
-            AVG(temperature) as mean_temperature,
-            STDDEV(temperature) as std_temperature,
-            MIN(temperature) as min_temperature,
-            MAX(temperature) as max_temperature,
-            AVG(salinity) as mean_salinity,
-            STDDEV(salinity) as std_salinity,
-            MIN(salinity) as min_salinity,
-            MAX(salinity) as max_salinity,
-            AVG(pressure) as mean_pressure,
-            MAX(pressure) as max_pressure,
-            MIN(measurement_time) as earliest_measurement,
-            MAX(measurement_time) as latest_measurement
-        FROM argo_floats;
-        """
-        return {"sql": sql, "type": "statistics"}
-
-    def _handle_correlation(self, _) -> Dict[str, Any]:
-        """Handle correlation analysis"""
-        sql = """
-        SELECT temperature, salinity, pressure, latitude, longitude 
-        FROM argo_floats 
-        WHERE temperature IS NOT NULL AND salinity IS NOT NULL;
-        """
-        return {"sql": sql, "type": "correlation"}
-
-    def _get_all_floats_query(self) -> str:
-        """Get all floats query"""
-        return "SELECT DISTINCT platform_number, AVG(latitude) as avg_lat, AVG(longitude) as avg_lon FROM argo_floats GROUP BY platform_number ORDER BY platform_number;"
-
-    def _generate_with_openai(self, query: str, api_key: str) -> str:
-        """Generate SQL using OpenAI API"""
-        try:
-            headers = {
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            }
-            
-            prompt = f"""
-            You are an expert oceanographer and SQL developer. Generate a PostgreSQL query for ARGO float data.
-
-            Database Schema:
-            {self.schema_info}
-
-            User Query: "{query}"
-
-            Generate a SQL query that:
-            1. Answers the user's question accurately
-            2. Uses proper oceanographic terminology
-            3. Includes relevant columns for visualization
-            4. Handles NULL values appropriately
-            5. Uses appropriate LIMIT clauses for performance
-
-            Return only the SQL query, no explanations.
-            """
-            
-            payload = {
-                "model": "gpt-3.5-turbo",
-                "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 300,
-                "temperature": 0.3
-            }
-            
-            response = requests.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=30
-            )
-            
-            if response.status_code == 200:
-                return response.json()['choices'][0]['message']['content'].strip()
-            else:
-                st.warning(f"OpenAI API error: {response.status_code}")
-                
-        except Exception as e:
-            st.warning(f"AI query generation failed: {e}")
-        
-        return "SELECT * FROM argo_floats ORDER BY measurement_time DESC LIMIT 20;"
-
-    def _interpret_query(self, query: str, analysis_type: str) -> str:
-        """Provide human-readable interpretation of the query"""
-        interpretations = {
-            "location_analysis": f"Finding ARGO floats nearest to the specified location with distance calculations.",
-            "ts_diagram": "Generating Temperature-Salinity diagram data for water mass analysis.",
-            "mixed_layer_depth": "Analyzing mixed layer depth from temperature and salinity profiles.",
-            "depth_profile": "Creating vertical ocean profiles showing temperature and salinity vs depth.",
-            "seasonal_analysis": "Examining seasonal trends and cycles in oceanographic parameters.",
-            "statistics": "Computing comprehensive statistical summary of all ARGO float measurements.",
-            "general": f"Processing general query: {query}"
-        }
-        
-        return interpretations.get(analysis_type, f"Analyzing: {query}")
-
-    def create_ts_diagram(self, df: pd.DataFrame) -> go.Figure:
-        """Create Temperature-Salinity diagram"""
-        if df.empty or 'temperature' not in df.columns or 'salinity' not in df.columns:
-            return go.Figure().add_annotation(text="No T-S data available", 
-                                            xref="paper", yref="paper", 
-                                            x=0.5, y=0.5, showarrow=False)
-        
-        fig = go.Figure()
-        
-        # Color by depth (pressure)
-        if 'pressure' in df.columns:
-            fig.add_trace(go.Scatter(
-                x=df['salinity'],
-                y=df['temperature'],
-                mode='markers',
-                marker=dict(
-                    size=4,
-                    color=df['pressure'],
-                    colorscale='Viridis',
-                    colorbar=dict(title="Pressure (dbar)"),
-                    opacity=0.7
-                ),
-                text=df.apply(lambda row: f"Float: {row.get('platform_number', 'N/A')}<br>"
-                                        f"Depth: {row.get('pressure', 'N/A')} dbar<br>"
-                                        f"T: {row['temperature']:.2f}°C<br>"
-                                        f"S: {row['salinity']:.2f} PSU", axis=1),
-                hovertemplate="%{text}<extra></extra>",
-                name="T-S Data"
-            ))
-        else:
-            fig.add_trace(go.Scatter(
-                x=df['salinity'],
-                y=df['temperature'],
-                mode='markers',
-                marker=dict(size=4, opacity=0.7),
-                name="T-S Data"
-            ))
-        
-        fig.update_layout(
-            title="Temperature-Salinity Diagram",
-            xaxis_title="Salinity (PSU)",
-            yaxis_title="Temperature (°C)",
-            hovermode='closest',
-            template='plotly_white'
-        )
-        
-        return fig
-
-    def create_depth_profile(self, df: pd.DataFrame) -> go.Figure:
-        """Create depth profile visualization"""
-        if df.empty:
-            return go.Figure()
-        
-        fig = make_subplots(
-            rows=1, cols=2,
-            subplot_titles=('Temperature Profile', 'Salinity Profile'),
-            shared_yaxes=True
-        )
-        
-        # Group by float and cycle
-        colors = px.colors.qualitative.Set3
-        color_idx = 0
-        
-        for (platform, cycle), group in df.groupby(['platform_number', 'cycle_number']):
-            if color_idx > 20:  # Limit number of profiles for readability
-                break
-                
-            group = group.sort_values('pressure')
-            color = colors[color_idx % len(colors)]
-            
-            if 'temperature' in group.columns:
-                fig.add_trace(
-                    go.Scatter(
-                        x=group['temperature'],
-                        y=-group['pressure'],  # Negative for depth
-                        mode='lines+markers',
-                        name=f"Float {platform} Cycle {cycle}",
-                        line=dict(color=color),
-                        showlegend=(color_idx < 10)  # Only show legend for first 10
-                    ),
-                    row=1, col=1
-                )
-            
-            if 'salinity' in group.columns:
-                fig.add_trace(
-                    go.Scatter(
-                        x=group['salinity'],
-                        y=-group['pressure'],
-                        mode='lines+markers',
-                        name=f"Float {platform} Cycle {cycle}",
-                        line=dict(color=color),
-                        showlegend=False
-                    ),
-                    row=1, col=2
-                )
-            
-            color_idx += 1
-        
-        fig.update_xaxes(title_text="Temperature (°C)", row=1, col=1)
-        fig.update_xaxes(title_text="Salinity (PSU)", row=1, col=2)
-        fig.update_yaxes(title_text="Depth (m)", row=1, col=1)
-        
-        fig.update_layout(
-            title="Ocean Depth Profiles",
-            height=600,
-            hovermode='closest'
-        )
-        
-        return fig
-
-    def create_advanced_map(self, df: pd.DataFrame, analysis_type: str = "general") -> folium.Map:
-        """Create advanced interactive map"""
-        if df.empty or 'latitude' not in df.columns or 'longitude' not in df.columns:
-            return None
-        
-        center_lat = df['latitude'].mean()
-        center_lon = df['longitude'].mean()
-        
-        m = folium.Map(
-            location=[center_lat, center_lon],
-            zoom_start=5,
-            tiles='OpenStreetMap'
-        )
-        
-        # Add different tile layers
-        folium.TileLayer('CartoDB Positron', name='Light Map').add_to(m)
-        folium.TileLayer('CartoDB Dark_Matter', name='Dark Map').add_to(m)
-        
-        # Add markers
-        for idx, row in df.iterrows():
-            popup_content = f"""
-            <div style="width: 200px;">
-                <h4>ARGO Float {row['platform_number']}</h4>
-                <p><b>Location:</b> {row['latitude']:.4f}°N, {row['longitude']:.4f}°E</p>
-                <p><b>Temperature:</b> {row.get('temperature', 'N/A')}°C</p>
-                <p><b>Salinity:</b> {row.get('salinity', 'N/A')} PSU</p>
-                <p><b>Depth:</b> {row.get('pressure', 'N/A')} dbar</p>
-                <p><b>Time:</b> {str(row.get('measurement_time', 'N/A'))}</p>
-            </div>
-            """
-            
-            folium.Marker(
-                location=[row['latitude'], row['longitude']],
-                popup=folium.Popup(popup_content, max_width=300),
-                icon=folium.Icon(color='blue', icon='tint')
-            ).add_to(m)
-        
-        # Add layer control
-        folium.LayerControl().add_to(m)
-        
-        return m
+# Initialize the Groq client
+@st.cache_resource
+def init_groq_client():
+    return Groq(api_key="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")
 
 # Database connection pool
 @st.cache_resource
-# Database connection pool with better error handling
-@st.cache_resource
 def init_db_pool():
     try:
-        # Try the pooled connection first
-        pool = SimpleConnectionPool(
+        return SimpleConnectionPool(
             1, 10,
             "postgresql://neondb_owner:npg_qV9a3dQRAeBm@ep-still-field-a17hi4xm-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
         )
-        
-        # Test the connection
-        conn = pool.getconn()
-        cursor = conn.cursor()
-        cursor.execute("SELECT 1;")
-        cursor.close()
-        pool.putconn(conn)
-        
-        logger.info("Database connection pool established successfully")
-        return pool
-        
     except Exception as e:
-        logger.warning(f"Database connection pool failed: {e}. Using fallback connection.")
-        
-        # Try direct connection as fallback
-        try:
-            conn = psycopg2.connect(**DB_CONFIG)
-            conn.close()
-            logger.info("Direct database connection successful")
-            # Create a simple pool wrapper for direct connections
-            return SimpleDirectConnectionPool(DB_CONFIG)
-        except Exception as direct_error:
-            logger.error(f"Direct connection also failed: {direct_error}. Using sample data.")
-            st.warning("Database connection unavailable. Using sample data for demonstration.")
-            return None
+        logger.error(f"Database connection pool failed: {e}")
+        st.warning(f"Database connection pool failed: {e}. Using sample data.")
+        return None
 
-# Fallback connection pool class for direct connections
-class SimpleDirectConnectionPool:
-    def __init__(self, db_config):
-        self.db_config = db_config
-        self.connections = 0
-        self.max_connections = 5
-    
-    def getconn(self):
-        if self.connections >= self.max_connections:
-            raise Exception("Connection limit reached")
-        self.connections += 1
-        return psycopg2.connect(**self.db_config)
-    
-    def putconn(self, conn):
-        conn.close()
-        self.connections -= 1
 # Sample ARGO float data (enhanced from the original HTML)
 @st.cache_data
 def get_sample_argo_data():
@@ -2891,30 +2284,18 @@ def get_sample_argo_data():
     return pd.DataFrame(all_floats)
 
 # Database connection function with connection pool
-# Database connection function with connection pool and retry logic
 def get_db_connection():
     pool = init_db_pool()
     if pool is None:
         return None
     
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            conn = pool.getconn()
-            # Test the connection
-            cursor = conn.cursor()
-            cursor.execute("SELECT 1;")
-            cursor.close()
-            return conn
-        except Exception as e:
-            logger.warning(f"Connection attempt {attempt + 1} failed: {e}")
-            if attempt == max_retries - 1:
-                logger.error(f"All connection attempts failed: {e}")
-                st.warning(f"Database connection failed: {e}. Using sample data.")
-                return None
-            time.sleep(1)  # Wait before retrying
-    
-    return None
+    try:
+        conn = pool.getconn()
+        return conn
+    except Exception as e:
+        logger.error(f"Failed to get connection from pool: {e}")
+        st.warning(f"Database connection failed: {e}. Using sample data.")
+        return None
 
 # Enhanced Cesium component with proper configuration
 def create_enhanced_cesium_map():
@@ -3075,6 +2456,61 @@ def create_enhanced_cesium_map():
     """
     return cesium_html
 
+# System prompt for LLM (enhanced for advanced queries)
+system_prompt = """
+You are FloatChat, an AI assistant for querying an ARGO ocean database. Your purpose is to translate natural language queries into precise PostgreSQL queries.
+
+Database Schema for table 'argo_floats':
+- platform_number (TEXT): The unique ID of the float (e.g., '2902743')
+- cycle_number (INTEGER): The profile number from the float
+- measurement_time (TIMESTAMP): UTC time of the observation. Use for all time filters
+- latitude (FLOAT), longitude (FLOAT): Use for all location filters
+- pressure (FLOAT): Depth in decibars (~meters). Lower values are shallower
+- temperature (FLOAT): in °C
+- salinity (FLOAT): Practical Salinity Units (PSU)
+- region (TEXT): Pre-set region like 'Indian Ocean'
+- oxygen (FLOAT): Optional - dissolved oxygen (μmol/kg)
+- chlorophyll (FLOAT): Optional - chlorophyll concentration (mg/m³)
+- nitrate (FLOAT): Optional - nitrate concentration (μmol/kg)
+
+IMPORTANT LOCATIONS (latitude, longitude):
+- Chennai, India: (13.0825, 80.2707)
+- Mumbai, India: (19.0760, 72.8777)
+- Kochi, India: (9.9312, 76.2673)
+- Andaman Islands: (11.7401, 92.6586)
+- Lakshadweep Islands: (10.5667, 72.6417)
+- Bay of Bengal: (15.0, 90.0) with approximate bounds 5°N to 22°N and 80°E to 100°E
+- Arabian Sea: (15.0, 65.0) with approximate bounds 5°N to 25°N and 50°E to 70°E
+
+OCEANOGRAPHIC CONCEPTS:
+- Thermocline: Layer where temperature changes rapidly with depth
+- Halocline: Layer where salinity changes rapidly with depth
+- Mixed Layer Depth: Depth where temperature is 0.5°C different from surface
+- Upwelling: Cooler, nutrient-rich water rising to surface
+- Monsoon effects: Seasonal changes in Indian Ocean
+
+RULES:
+1. Your output MUST be structured as:
+   <response>[Natural language explanation of the query]</response>
+   <sql>[Valid PostgreSQL SELECT query]</sql>
+
+2. For ALL queries:
+   - Include a LIMIT clause (default LIMIT 100 unless user specifies "all" or similar)
+   - Use appropriate WHERE clauses for filtering
+   - Select only necessary columns (use * only when specifically requested)
+   - For spatial queries, use bounding boxes with appropriate margins
+   - For temporal queries, use appropriate date ranges
+   - For depth-based queries, use pressure as a proxy for depth
+
+3. SPECIAL HANDLING FOR ADVANCED QUERIES:
+   - For thermocline/halocline: Calculate temperature/salinity gradients
+   - For water masses: Use T-S diagrams with specific boundaries
+   - For monsoon effects: Use seasonal date ranges (Jun-Sep for SW monsoon, Dec-Feb for NE monsoon)
+   - For upwelling: Look for anomalously cold surface waters in specific regions
+
+Now, generate the appropriate response and SQL query for the following request:
+"""
+
 def get_all_float_locations():
     """Fetch all float locations from the database"""
     conn = get_db_connection()
@@ -3107,127 +2543,264 @@ def get_all_float_locations():
         if pool and conn:
             pool.putconn(conn)
 
+def extract_sql(response):
+    sql_match = re.search(r'<sql>(.*?)</sql>', response, re.DOTALL)
+    if sql_match:
+        return sql_match.group(1).strip()
+    return None
+
 # Input sanitization function
 def sanitize_input(user_input):
     return html.escape(user_input.strip())
 
 # Enhanced execute_sql_query with better error handling
-# Enhanced execute_sql_query with better error handling and fallback
 def execute_sql_query(sql_query):
     conn = get_db_connection()
-    
-    # If no connection, use sample data
     if conn is None:
-        logger.info("Using sample data due to connection issues")
-        return execute_sql_query_on_sample(sql_query)
+        # Use sample data and simulate query execution
+        df = get_sample_argo_data()
+        try:
+            # Simple query simulation for common patterns
+            if "temperature" in sql_query.lower() and ">" in sql_query:
+                temp_threshold = float(re.findall(r'temperature\s*>\s*(\d+(?:\.\d+)?)', sql_query.lower())[0])
+                df = df[df['temperature'] > temp_threshold]
+            elif "salinity" in sql_query.lower() and ">" in sql_query:
+                sal_threshold = float(re.findall(r'salinity\s*>\s*(\d+(?:\.\d+)?)', sql_query.lower())[0])
+                df = df[df['salinity'] > sal_threshold]
+            elif "recent" in sql_query.lower() or "last" in sql_query.lower():
+                df = df[df['measurement_time'] > (datetime.now() - timedelta(days=7))]
+            
+            return df.head(100)
+        except Exception as e:
+            logger.error(f"Error simulating query: {e}")
+            return df.head(100)
     
     try:
         df = pd.read_sql_query(sql_query, conn)
-        logger.info(f"Query executed successfully, returned {len(df)} rows")
+        # Return connection to pool
+        pool = init_db_pool()
+        if pool:
+            pool.putconn(conn)
         return df
     except Exception as e:
         logger.error(f"Error executing SQL query: {e}")
         st.error(f"Error executing SQL query: {e}")
-        
         # Provide helpful suggestions based on error type
         if "syntax" in str(e).lower():
             st.info("Try simplifying your query or check for syntax errors")
-        elif "connection" in str(e).lower():
-            st.warning("Database connection issue. Using sample data.")
-            return execute_sql_query_on_sample(sql_query)
         
         # Return connection to pool in case of error
         pool = init_db_pool()
-        if pool and conn:
-            try:
-                pool.putconn(conn)
-            except:
-                pass
-                
-        return execute_sql_query_on_sample(sql_query)
-    finally:
-        # Always try to return connection to pool
-        pool = init_db_pool()
-        if pool and conn:
-            try:
-                pool.putconn(conn)
-            except:
-                pass
+        if pool:
+            pool.putconn(conn)
+        return get_sample_argo_data().head(100)
 
-# Execute query on sample data when DB is unavailable
-def execute_sql_query_on_sample(sql_query):
-    df = get_sample_argo_data()
+# Function to handle advanced oceanographic queries
+def process_advanced_query(user_query, df_columns):
+    """
+    Handle advanced oceanographic queries that require special processing
+    Returns modified SQL query or None if no special handling needed
+    """
+    user_query_lower = user_query.lower()
     
-    # Simple query simulation for common patterns
-    try:
-        query_lower = sql_query.lower()
-        
-        # Handle WHERE clauses
-        if "where" in query_lower:
-            # Temperature conditions
-            if "temperature" in query_lower:
-                if ">" in query_lower:
-                    match = re.search(r'temperature\s*>\s*(\d+(?:\.\d+)?)', query_lower)
-                    if match:
-                        temp_threshold = float(match.group(1))
-                        df = df[df['temperature'] > temp_threshold]
-                elif "<" in query_lower:
-                    match = re.search(r'temperature\s*<\s*(\d+(?:\.\d+)?)', query_lower)
-                    if match:
-                        temp_threshold = float(match.group(1))
-                        df = df[df['temperature'] < temp_threshold]
-            
-            # Salinity conditions
-            if "salinity" in query_lower:
-                if ">" in query_lower:
-                    match = re.search(r'salinity\s*>\s*(\d+(?:\.\d+)?)', query_lower)
-                    if match:
-                        sal_threshold = float(match.group(1))
-                        df = df[df['salinity'] > sal_threshold]
-                elif "<" in query_lower:
-                    match = re.search(r'salinity\s*<\s*(\d+(?:\.\d+)?)', query_lower)
-                    if match:
-                        sal_threshold = float(match.group(1))
-                        df = df[df['salinity'] < sal_threshold]
-            
-            # Time conditions
-            if "recent" in query_lower or "last" in query_lower:
-                days_match = re.search(r'last\s+(\d+)\s+days?', query_lower)
-                if days_match:
-                    days = int(days_match.group(1))
-                else:
-                    days = 7  # Default to 7 days
-                df = df[df['measurement_time'] > (datetime.now() - timedelta(days=days))]
-        
-        # Handle ORDER BY
-        if "order by" in query_lower:
-            if "temperature" in query_lower and "desc" in query_lower:
-                df = df.sort_values('temperature', ascending=False)
-            elif "temperature" in query_lower:
-                df = df.sort_values('temperature', ascending=True)
-            elif "salinity" in query_lower and "desc" in query_lower:
-                df = df.sort_values('salinity', ascending=False)
-            elif "salinity" in query_lower:
-                df = df.sort_values('salinity', ascending=True)
-            elif "measurement_time" in query_lower and "desc" in query_lower:
-                df = df.sort_values('measurement_time', ascending=False)
-            elif "measurement_time" in query_lower:
-                df = df.sort_values('measurement_time', ascending=True)
-        
-        # Handle LIMIT
-        limit_match = re.search(r'limit\s+(\d+)', query_lower)
-        if limit_match:
-            limit = int(limit_match.group(1))
-            df = df.head(limit)
+    # Thermocline detection
+    if any(term in user_query_lower for term in ['thermocline', 'temperature gradient', 'mixed layer']):
+        return """
+        WITH depth_bins AS (
+            SELECT 
+                platform_number,
+                cycle_number,
+                FLOOR(pressure/100) * 100 as depth_bin,
+                AVG(temperature) as avg_temp,
+                COUNT(*) as measurements
+            FROM argo_floats
+            WHERE pressure BETWEEN 0 AND 1000
+            GROUP BY platform_number, cycle_number, FLOOR(pressure/100) * 100
+            HAVING COUNT(*) > 5
+        ),
+        temp_gradients AS (
+            SELECT 
+                platform_number,
+                cycle_number,
+                depth_bin,
+                avg_temp,
+                LAG(avg_temp) OVER (PARTITION BY platform_number, cycle_number ORDER BY depth_bin) as prev_temp,
+                (avg_temp - LAG(avg_temp) OVER (PARTITION BY platform_number, cycle_number ORDER BY depth_bin)) / 100 as temp_gradient
+            FROM depth_bins
+        )
+        SELECT 
+            platform_number,
+            cycle_number,
+            depth_bin as pressure_level,
+            avg_temp,
+            temp_gradient
+        FROM temp_gradients
+        WHERE ABS(temp_gradient) > 0.05
+        ORDER BY platform_number, cycle_number, depth_bin
+        LIMIT 100
+        """
+    
+    # Water mass identification using T-S diagrams
+    if any(term in user_query_lower for term in ['water mass', 'ts diagram', 'temperature-salinity']):
+        return """
+        SELECT 
+            platform_number,
+            cycle_number,
+            temperature,
+            salinity,
+            pressure,
+            measurement_time,
+            latitude,
+            longitude
+        FROM argo_floats
+        WHERE temperature IS NOT NULL 
+          AND salinity IS NOT NULL
+          AND pressure BETWEEN 0 AND 2000
+        ORDER BY platform_number, cycle_number, pressure
+        LIMIT 200
+        """
+    
+    # Monsoon effects
+    if any(term in user_query_lower for term in ['monsoon', 'seasonal', 'upwelling']):
+        # Determine which monsoon season based on query
+        if 'southwest' in user_query_lower or 'sw monsoon' in user_query_lower:
+            month_condition = "EXTRACT(MONTH FROM measurement_time) BETWEEN 6 AND 9"
+        elif 'northeast' in user_query_lower or 'ne monsoon' in user_query_lower:
+            month_condition = "EXTRACT(MONTH FROM measurement_time) IN (12, 1, 2)"
         else:
-            df = df.head(100)  # Default limit for sample data
-            
-    except Exception as e:
-        logger.error(f"Error simulating query on sample data: {e}")
-        # Return limited sample data as fallback
-        return df.head(100)
+            # General monsoon query
+            month_condition = "EXTRACT(MONTH FROM measurement_time) BETWEEN 6 AND 9 OR EXTRACT(MONTH FROM measurement_time) IN (12, 1, 2)"
+        
+        return f"""
+        SELECT 
+            platform_number,
+            cycle_number,
+            measurement_time,
+            latitude,
+            longitude,
+            temperature,
+            salinity,
+            pressure
+        FROM argo_floats
+        WHERE ({month_condition})
+          AND latitude BETWEEN 5 AND 25
+          AND longitude BETWEEN 50 AND 100
+        ORDER BY measurement_time DESC
+        LIMIT 100
+        """
     
-    return df
+    # Bio-geo-chemical parameters
+    if any(term in user_query_lower for term in ['oxygen', 'chlorophyll', 'nitrate', 'bgc', 'bio-geo-chemical']):
+        # Check which BGC parameters are available
+        available_columns = []
+        if 'oxygen' in df_columns and any(term in user_query_lower for term in ['oxygen', 'o2']):
+            available_columns.append('oxygen')
+        if 'chlorophyll' in df_columns and any(term in user_query_lower for term in ['chlorophyll', 'chl']):
+            available_columns.append('chlorophyll')
+        if 'nitrate' in df_columns and any(term in user_query_lower for term in ['nitrate', 'no3']):
+            available_columns.append('nitrate')
+        
+        if available_columns:
+            columns_str = ', '.join(available_columns)
+            return f"""
+            SELECT 
+                platform_number,
+                cycle_number,
+                measurement_time,
+                latitude,
+                longitude,
+                pressure,
+                temperature,
+                salinity,
+                {columns_str}
+            FROM argo_floats
+            WHERE {' IS NOT NULL OR '.join(available_columns)} IS NOT NULL
+            ORDER BY measurement_time DESC
+            LIMIT 100
+            """
+    
+    return None
+
+# Cached and rate-limited version of process_user_query
+@lru_cache(maxsize=100)
+@st.cache_data(ttl=300)  # Cache for 5 minutes
+def process_user_query_cached(user_query):
+    # Add a small delay to prevent rate limiting
+    time.sleep(0.5)
+    return process_user_query(user_query)
+
+def process_user_query(user_query):
+    try:
+        # First check if this is an advanced query that needs special handling
+        conn = get_db_connection()
+        df_columns = []
+        if conn:
+            try:
+                # Get column names to check for BGC parameters
+                cursor = conn.cursor()
+                cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'argo_floats'")
+                df_columns = [row[0] for row in cursor.fetchall()]
+            except Exception as e:
+                logger.error(f"Error fetching column names: {e}")
+            finally:
+                # Return connection to pool
+                pool = init_db_pool()
+                if pool and conn:
+                    pool.putconn(conn)
+        
+        # Check for advanced queries
+        advanced_sql = process_advanced_query(user_query, df_columns)
+        
+        if advanced_sql:
+            # Use the advanced SQL directly
+            with st.spinner("Executing advanced oceanographic query..."):
+                df = execute_sql_query(advanced_sql)
+            
+            if df is None or df.empty:
+                st.warning("No data found for your advanced query.")
+                return None, None, None
+            
+            natural_response = f"Results for your query about '{user_query}':"
+            return natural_response, df, advanced_sql
+        
+        # For regular queries, use the LLM
+        groq_client = init_groq_client()
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_query}
+        ]
+        
+        with st.spinner("Generating SQL query..."):
+            completion = groq_client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=messages,
+                temperature=0.1,
+                max_tokens=1024
+            )
+        
+        llm_response = completion.choices[0].message.content
+        sql_query = extract_sql(llm_response)
+        
+        if not sql_query:
+            st.error("Could not generate a valid SQL query for your request.")
+            return None, None, None
+        
+        with st.spinner("Executing query..."):
+            df = execute_sql_query(sql_query)
+        
+        if df is None or df.empty:
+            st.warning("No data found for your query.")
+            return None, None, None
+        
+        response_match = re.search(r'<response>(.*?)</response>', llm_response, re.DOTALL)
+        natural_response = response_match.group[1].strip() if response_match else f"Results for your query: {user_query}"
+        
+        return natural_response, df, sql_query
+        
+    except Exception as e:
+        logger.error(f"Error processing request: {str(e)}")
+        st.error(f"Error processing request: {str(e)}")
+        return None, None, None
 
 # NASA PODAAC API Integration
 def get_nasa_datasets():
@@ -3462,42 +3035,6 @@ def display_dataframe_with_pagination(df):
     
     AgGrid(df, gridOptions=gridOptions, enable_enterprise_modules=True, height=400)
 
-# Cached and rate-limited version of process_user_query
-@lru_cache(maxsize=100)
-@st.cache_data(ttl=300)  # Cache for 5 minutes
-def process_user_query_cached(user_query, openai_key=None):
-    # Add a small delay to prevent rate limiting
-    time.sleep(0.5)
-    return process_user_query(user_query, openai_key)
-
-def process_user_query(user_query, openai_key=None):
-    try:
-        # Initialize the assistant if not already in session state
-        if 'assistant' not in st.session_state:
-            st.session_state.assistant = ArgoAIIntelligence()
-        
-        assistant = st.session_state.assistant
-        
-        # Generate enhanced query
-        query_result = assistant.advanced_nlp_to_sql(user_query, openai_key)
-        sql_query = query_result['sql']
-        analysis_type = query_result['analysis_type']
-        interpretation = query_result['query_interpretation']
-        
-        # Execute query using your existing execute_sql_query function
-        df = execute_sql_query(sql_query)
-        
-        if df is None or df.empty:
-            st.warning("No data found for your query.")
-            return None, None, None, None
-        
-        return interpretation, df, sql_query, analysis_type
-        
-    except Exception as e:
-        logger.error(f"Error processing request: {str(e)}")
-        st.error(f"Error processing request: {str(e)}")
-        return None, None, None, None
-
 # Main function with all enhancements
 def main():
     # Initialize session state
@@ -3512,9 +3049,6 @@ def main():
     
     if 'realtime_updates' not in st.session_state:
         st.session_state.realtime_updates = False
-    
-    if 'assistant' not in st.session_state:
-        st.session_state.assistant = ArgoAIIntelligence()
     
     # Header (matching original design)
     st.markdown("""
@@ -3560,7 +3094,10 @@ def main():
     
     # Real-time updates toggle
     col1, col2 = st.columns([3, 1])
-    
+    with col2:
+        if st.button("🔄 Enable Real-time Updates" if not st.session_state.realtime_updates else "⏹️ Disable Real-time Updates"):
+            st.session_state.realtime_updates = not st.session_state.realtime_updates
+            st.rerun()
     
     # Enhanced 3D Globe Visualization
     st.markdown('<div class="panel-title">🌍 Global ARGO Float Network - 3D Visualization</div>', unsafe_allow_html=True)
@@ -3584,34 +3121,32 @@ def main():
     components.html(cesium_html, height=600)
     
     # AI Chat Interface
-    st.markdown('<div class="panel-title"> AI-Powered Query Interface</div>', unsafe_allow_html=True)
+ 
     
     # Query input with tooltip
     col1, col2 = st.columns([4, 1])
     with col1:
         user_query = st.text_input(
-    label="",
-    placeholder="e.g., Show temperature profiles near Chennai",
-    key="main_query",
-    label_visibility="collapsed"
-)
+            "Ask about ARGO floats, oceanographic data, or specific analyses:",
+            placeholder="e.g., Show temperature profiles near Chennai",
+            key="main_query"
+        )
     
     with col2:
-        execute_query = st.button("🔍 ", key="execute_main", help="Execute your query")
+        execute_query = st.button("🔍 Execute", key="execute_main", help="Execute your query")
+        tooltip("💡", "Ask natural language questions about ARGO float data")
     
     # Sample queries (matching original design)
     st.markdown("**Sample Queries:**")
     
     sample_queries = [
         "Show floats near Arabian Sea",
-        "Salinity < 35 PSU",
-        "Find where temperature > 30°C", 
-        "What floats are closest to Mumbai?",
+        "Temperature above 28°C", 
+        "Salinity profiles in Indian Ocean",
         "Recent measurements from last week",
         "Find thermocline depth in Bay of Bengal",
         "Compare water masses in different ocean regions",
-        "Show monsoon effects on surface temperature",
-        "show floats near chennai"
+        "Show monsoon effects on surface temperature"
     ]
     
     query_cols = st.columns(len(sample_queries))
@@ -3627,12 +3162,6 @@ def main():
         user_query = selected_sample
         execute_query = True
     
-    # Add OpenAI API key to sidebar
-    with st.sidebar:
-        st.markdown("### 🔑 API Configuration")
-        openai_key = st.text_input("OpenAI API Key (optional)", type="password", 
-                                  help="Optional for enhanced AI capabilities")
-    
     # Process query if submitted
     if execute_query and user_query:
         # Sanitize input
@@ -3644,12 +3173,8 @@ def main():
             'timestamp': datetime.now()
         })
         
-        # Process query with caching (pass openai_key)
-        natural_response, df, sql_query, analysis_type = process_user_query_cached(user_query, openai_key)
-        
-        # Store analysis_type in session state for later use
-        if analysis_type:
-            st.session_state.last_analysis_type = analysis_type
+        # Process query with caching
+        natural_response, df, sql_query = process_user_query_cached(user_query)
         
         if df is not None:
             # Display results
@@ -3807,23 +3332,12 @@ def main():
                         st.subheader("Temporal Analysis")
                         
                         # Daily averages
-                        if 'temperature' in df.columns and 'measurement_time' in df.columns:
-    # Make sure measurement_time is datetime
-                            df['measurement_time'] = pd.to_datetime(df['measurement_time'], errors='coerce')
-
-                            # Build aggregation dictionary dynamically
-                            agg_dict = {'temperature': 'mean'}
-                            if 'salinity' in df.columns:
-                                agg_dict['salinity'] = 'mean'
-
-                            # Group by date and aggregate
-                            daily_data = (
-                                df.groupby(df['measurement_time'].dt.date)
-                                .agg(agg_dict)
-                                .reset_index()
-                                .rename(columns={'measurement_time': 'date'})  # optional rename
-                            )
-
+                        if 'temperature' in df.columns:
+                            daily_data = df.groupby(df['measurement_time'].dt.date).agg({
+                                'temperature': 'mean',
+                                'salinity': 'mean' if 'salinity' in df.columns else lambda x: None
+                            }).reset_index()
+                            
                             fig = go.Figure()
                             fig.add_trace(go.Scatter(
                                 x=daily_data['measurement_time'],
