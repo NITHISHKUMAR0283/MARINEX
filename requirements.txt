@@ -6,9 +6,8 @@ folium
 streamlit-folium
 requests
 numpy
-st-aggrid
+streamlit-aggrid  # Changed from st-aggrid
 seaborn
 geopy
 scipy
 scikit-learn
-sqlalchemy
