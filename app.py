@@ -3515,12 +3515,9 @@ def main():
             st.write("""
             - "Show floats near Chennai"
             - "Temperature above 28°C"
-            - "Salinity profiles from last month"
-            - "Deepest measurements in Indian Ocean"
-            - "Find thermocline depth in Bay of Bengal"
-            - "Compare water masses in different regions"
-            - "Show monsoon effects on surface temperature"
+            - "Show the longest flot form chennai"
             """)
 
 if __name__ == "__main__":
     main()
+
